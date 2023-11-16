@@ -31,7 +31,7 @@ namespace Valkyrie_Server
            
             var responseString = await response.Content.ReadAsStringAsync();
 
-            Debug.WriteLine("\n\n\t" + response.StatusCode + "\n");
+            Debug.WriteLine("\n\n\n\t" + response.StatusCode + "\n");
 
             return responseString;
         }
