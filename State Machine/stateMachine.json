@@ -1,0 +1,148 @@
+{
+  "variables": [
+    {
+      "name": "nameVariable",
+      "type": "text",
+      "value": "test"
+    },
+    {
+      "name": "guessVariable",
+      "type": "integer",
+      "value": "2"
+    },
+    {
+      "name": "max",
+      "type": "integer",
+      "value": "10"
+    },
+    {
+      "name": "min",
+      "type": "integer",
+      "value": "0"
+    }
+  ],
+  "functions": [
+    {
+      "name": "Guess",
+      "parameters": [
+        {
+          "name": "guess",
+          "type": "integer",
+          "connectVar": "guessVariable"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "connectVar": "nameVariable"
+        }
+      ]
+    },
+    {
+      "name": "Continue",
+      "parameters": []
+    },
+    {
+      "name": "GreetUser",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "text",
+          "connectVar": "nameVariable"
+        }
+      ]
+    },
+    {
+      "name": "SetRandomNumber",
+      "parameters": [
+        {
+          "name": "max",
+          "type": "integer",
+          "connectVar": "max"
+        },
+        {
+          "name": "min",
+          "type": "integer",
+          "connectVar": "min"
+        },
+        {
+          "name": "valueToChange",
+          "type": "integer",
+          "connectVar": "guessVariable"
+        }
+      ]
+    },  
+    {
+      "name": "ExitQuestion",
+      "parameters": []
+    }
+  ],
+  "states": [
+    {
+      "type": "start",
+      "name": "s",
+      "function": "GreetUser"
+    },
+    {
+      "type": "fallback",
+      "name": "exit",
+      "function": "Continue"
+    },
+    {
+      "type": "state",
+      "name": "guessNumber",
+      "function": "Guess"
+    },
+    {
+      "type": "state",
+      "name": "resetNumber",
+      "function": "SetRandomNumber"
+    },
+    {
+      "type": "state",
+      "name": "exitQuestion",
+      "function": "ExitQuestion"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "s",
+      "to": "guessNumber",
+      "outcome": 1
+    },
+    {
+      "from": "guessNumber",
+      "to": "guessNumber",
+      "outcome": 0
+    },
+    {
+      "from": "guessNumber",
+      "to": "exitQuestion",
+      "outcome": 1
+    },
+    {
+      "from": "exitQuestion",
+      "to": "resetNumber",
+      "outcome": 0
+    },
+    {
+      "from": "resetNumber",
+      "to": "guessNumber",
+      "outcome": 1
+    },
+    {
+      "from": "s",
+      "to": "s",
+      "outcome": 0
+    },
+    {
+      "from": "s",
+      "to": "exit",
+      "outcome": -1
+    },
+    {
+      "from": "exitQuestion",
+      "to": "exit",
+      "outcome": 1
+    }
+  ]
+}
