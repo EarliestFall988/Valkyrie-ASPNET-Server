@@ -16,6 +16,10 @@ var app = builder.Build();
 var apiKey = "some api key";
 var valkApiKey = "some key";
 
+StateMachinesController? stateMachinesController = new StateMachinesController();
+
+long minuteCountWaitTime = 5;
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -48,7 +52,6 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
         return "incorrect api key";
     }
 
-
     if (string.IsNullOrEmpty(instructionId))
     {
         context.Response.StatusCode = 400;
@@ -60,16 +63,70 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
         ValkyrieAPIKey = valkApiKey
     };
 
+
+
     var response = await ValkyireServerController.TryGetInstructions(instructionId);
 
-    return response;
+    if (response.result == false)
+    {
+        context.Response.StatusCode = 500;
+        return response.content;
+    }
 
-    //using (StreamReader reader = new StreamReader(context.Request.Body))
-    //{
-    //    string body = await reader.ReadToEndAsync();
-    //    context.Response.StatusCode = 200;
-    //    return body;
-    //}
+    string id = Guid.NewGuid().ToString();
+
+    if (!stateMachinesController.IsTicking)
+    {
+        stateMachinesController.Boot();
+    }
+
+
+    //Debug.WriteLine(response.content);
+
+
+    stateMachinesController.AddMachine(id, response.content);
+
+    (bool complete, string result) status = (false, "Not completed - state machine took too long.");
+
+    long tick = 0;
+
+
+    var totalTime = 100; //(60000 / 2) * minuteCountWaitTime;
+
+    while (!status.complete && tick < totalTime)
+    {
+
+       Debug.WriteLine("status: " + status.complete + " " + tick);
+
+        status = stateMachinesController.HandleStatus(id);
+
+        Thread.Sleep(100); // wait for the machine to complete
+        tick++;
+    }
+
+    if (stateMachinesController.GetMachines.Length == 0 && stateMachinesController.IsTicking)
+    {
+        stateMachinesController.Kill();
+    }
+
+    if (!status.complete && tick >= totalTime)
+    {
+        context.Response.StatusCode = 408;
+        stateMachinesController.KillStateMachineProcess(id); //remove the machine from the list of machines to process
+
+        return status.result;
+    }
+
+    if (status.complete)
+    {
+        context.Response.StatusCode = 200;
+        return status.result;
+    }
+    else
+    {
+        context.Response.StatusCode = 500;
+        return status.result;
+    }
 });
 
 app.MapGet("/weatherforecast", () =>

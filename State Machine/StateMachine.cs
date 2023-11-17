@@ -63,6 +63,7 @@ namespace Avalon
             States.Add(state);
         }
 
+        public string Result { get; set; } = "";
 
         private void RunStateMachine()
         {
@@ -273,7 +274,7 @@ namespace Avalon
             }
 
             Console.WriteLine("\n\n\t>Exiting...");
-         
+
         }
     }
 }

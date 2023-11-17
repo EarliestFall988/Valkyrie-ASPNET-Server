@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,8 +39,8 @@ namespace Avalon
                 string name = Parameters["name"].GetText();
                 int guessNumber = Parameters["guess"].GetInt();
 
-                Console.WriteLine($"Okay {name}, Guess a number");
-                string? number = Console.ReadLine();
+                Debug.WriteLine($"Okay {name}, Guess a number");
+                string? number = guessNumber.ToString(); // Console.ReadLine();
 
                 if (number == null || number.Trim() == "")
                     return 0;
@@ -54,19 +55,19 @@ namespace Avalon
 
                 if (!result)
                 {
-                    Console.WriteLine("That's not a number! Try again!");
+                    Debug.WriteLine("That's not a number! Try again!");
                     return 0;
                 }
 
 
                 if (guessNumber == numberInt)
                 {
-                    Console.WriteLine("Correct.");
+                    Debug.WriteLine("Correct.");
                     return 1;
                 }
                 else
                 {
-                    Console.WriteLine("Incorrect. Try Again");
+                    Debug.WriteLine("Incorrect. Try Again");
                     return 0;
                 }
             };

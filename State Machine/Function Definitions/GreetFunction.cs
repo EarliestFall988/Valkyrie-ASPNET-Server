@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,16 +30,16 @@ namespace Avalon
             {
 
                 string? result = "";
-                Console.WriteLine("Hello!");
+                Debug.WriteLine("Hello!");
 
                 while (result == null || result == string.Empty)
                 {
-                    Console.WriteLine("What is your Name?");
-                    result = Console.ReadLine();
+                    Debug.WriteLine("What is your Name?");
+                    result = "John Doe"; // Console.ReadLine();
 
                     if (result == null || result == string.Empty)
                     {
-                        Console.WriteLine("That's not your name!");
+                        Debug.WriteLine("That's not your name!");
                     }
 
                     if (result?.ToLower().Trim() == "exit")
@@ -52,7 +53,7 @@ namespace Avalon
 
                     // if (!success)
                     // {
-                    //     Console.WriteLine("could not write to store");
+                    //     Debug.WriteLine("could not write to store");
                     //     return -1;
                     // }
                 }

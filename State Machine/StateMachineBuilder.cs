@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using System.Text.Json;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Avalon
 {
@@ -57,9 +58,9 @@ namespace Avalon
 
             AddState(new State(trimmedName, stateJob));
             if (trimmedJobName != null && trimmedJobName != string.Empty)
-                Console.WriteLine("adding state " + trimmedName + " : " + trimmedJobName);
+                Debug.WriteLine("adding state " + trimmedName + " : " + trimmedJobName);
             else
-                Console.WriteLine("adding state " + trimmedName + " : " + "default");
+                Debug.WriteLine("adding state " + trimmedName + " : " + "default");
         }
 
         public void AddState(State state)
@@ -79,7 +80,7 @@ namespace Avalon
             State state = new State(trimmedName, stateJob.Function);
 
             machine.InitialState = state;
-            Console.WriteLine("adding initial " + trimmedName + " : " + trimmedJobName);
+            Debug.WriteLine("adding initial " + trimmedName + " : " + trimmedJobName);
 
             AddState(state);
 
@@ -101,9 +102,9 @@ namespace Avalon
 
             machine.FallbackState = state;
             if (trimmedJobName != null && trimmedJobName != string.Empty)
-                Console.WriteLine("adding fallback " + trimmedName + " : " + trimmedJobName);
+                Debug.WriteLine("adding fallback " + trimmedName + " : " + trimmedJobName);
             else
-                Console.WriteLine("adding fallback " + trimmedName + " : " + "default");
+                Debug.WriteLine("adding fallback " + trimmedName + " : " + "default");
 
 
             AddState(state);
@@ -118,12 +119,12 @@ namespace Avalon
 
             // foreach (var x in States.Keys)
             // {
-            //     Console.WriteLine(x);
+            //     Debug.WriteLine(x);
             // }
 
             var transitionName = trimmedFrom + " -> " + trimmedTo;
 
-            Console.WriteLine(trimmedName);
+            Debug.WriteLine(trimmedName);
 
             Transition t = new Transition(States[trimmedFrom], States[trimmedTo], trimmedName, outcome);
 
@@ -135,11 +136,11 @@ namespace Avalon
                 if (machine.FallbackState != null)
                 {
                     machine.FallbackState.Transitions.Add(Transitions[trimmedName]);
-                    // Console.WriteLine("Added fallback state transition.");
+                    // Debug.WriteLine("Added fallback state transition.");
                 }
                 else
                 {
-                    Console.WriteLine("fallback state not set in the state machine.");
+                    Debug.WriteLine("fallback state not set in the state machine.");
                 }
             }
 
@@ -148,11 +149,11 @@ namespace Avalon
                 if (machine.InitialState != null)
                 {
                     machine.InitialState.Transitions.Add(Transitions[trimmedName]);
-                    // Console.WriteLine("Added initial state transition");
+                    // Debug.WriteLine("Added initial state transition");
                 }
                 else
                 {
-                    Console.WriteLine("initial state not set in the state machine.");
+                    Debug.WriteLine("initial state not set in the state machine.");
                 }
             }
 
@@ -161,7 +162,7 @@ namespace Avalon
                 States[trimmedFrom].Transitions.Add(t);
             }
 
-            Console.WriteLine("adding transition " + trimmedName + " (" + trimmedFrom + " -> " + trimmedTo + " && " + outcome + ")");
+            Debug.WriteLine("adding transition " + trimmedName + " (" + trimmedFrom + " -> " + trimmedTo + " && " + outcome + ")");
         }
 
         private bool GetType(string type, out StateMachineVariableType result)
@@ -275,7 +276,7 @@ namespace Avalon
                 string? visibility = "";
                 if (foundProperty) visibility = refProp.GetString();
 
-                // Console.WriteLine($"adding variable {name} ({type}) =  {value}.");
+                // Debug.WriteLine($"adding variable {name} ({type}) =  {value}.");
 
                 if (type == null)
                     throw new Exception($"Invalid variable definition. A valid type must be given after the name. ({type})");
@@ -299,11 +300,11 @@ namespace Avalon
 
                 if (variableType == StateMachineVariableType.Text)
                 {
-                    Console.WriteLine($"adding variable {name} ({variableType}) = \"{value}\".");
+                    Debug.WriteLine($"adding variable {name} ({variableType}) = \"{value}\".");
                 }
                 else
                 {
-                    Console.WriteLine($"adding variable {name} ({variableType}) = {value}.");
+                    Debug.WriteLine($"adding variable {name} ({variableType}) = {value}.");
                 }
 
                 Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
@@ -496,7 +497,7 @@ namespace Avalon
 
             foreach (var x in functions)
             {
-                Console.WriteLine($"Function added {x.Key} {string.Join(',', x.Value.ExpectedParameters.Keys)} .");
+                Debug.WriteLine($"Function added {x.Key} {string.Join(',', x.Value.ExpectedParameters.Keys)} .");
             }
 
 
@@ -569,7 +570,7 @@ namespace Avalon
 
             foreach (var x in States)
             {
-                Console.WriteLine($"State added {x.Key}.");
+                Debug.WriteLine($"State added {x.Key}.");
             }
 
             foreach (var t in transitions.EnumerateArray())
@@ -595,21 +596,21 @@ namespace Avalon
             }
 
 
-            Console.WriteLine("\n\t>Building State Machine...\n\n");
+            Debug.WriteLine("\n\t>Building State Machine...\n\n");
 
 
             if (!createdVariables)
             {
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No variables defined.");
-                Console.ResetColor();
+                //Debug.BackgroundColor = DebugColor.Yellow;
+                Debug.WriteLine("No variables defined.");
+                //Debug.ResetColor();
             }
 
             if (!createdFunctions || functions.Count < 1)
             {
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No functions defined.");
-                Console.ResetColor();
+                //Debug.BackgroundColor = DebugColor.Yellow;
+                Debug.WriteLine("No functions defined.");
+                //Debug.ResetColor();
             }
 
             if (!createdStart)
@@ -624,23 +625,23 @@ namespace Avalon
 
             if (!createdStates)
             {
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No states defined.");
-                Console.ResetColor();
+                //Debug.BackgroundColor = DebugColor.Yellow;
+                Debug.WriteLine("No states defined.");
+                //Debug.ResetColor();
             }
 
             if (!createdTransitions)
             {
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No transitions defined.");
-                Console.ResetColor();
+                //Debug.BackgroundColor = DebugColor.Yellow;
+                Debug.WriteLine("No transitions defined.");
+                //Debug.ResetColor();
             }
 
-            Console.WriteLine("\t>Result:\n\n");
+            Debug.WriteLine("\t>Result:\n\n");
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Imported Functions:");
-            Console.ResetColor();
+            //Debug.ForegroundColor = DebugColor.Green;
+            Debug.WriteLine("Imported Functions:");
+            //Debug.ResetColor();
             foreach (var x in functions.Values)
             {
 
@@ -653,19 +654,19 @@ namespace Avalon
 
                 pmtrs = pmtrs.Trim().TrimEnd(',');
 
-                Console.WriteLine("|" + x.Name + " [" + pmtrs + "]");
+                Debug.WriteLine("|" + x.Name + " [" + pmtrs + "]");
             }
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n\nDefined States:");
-            Console.ResetColor();
+            //Debug.ForegroundColor = DebugColor.Green;
+            Debug.WriteLine("\n\nDefined States:");
+            //Debug.ResetColor();
 
             foreach (var x in States.Values)
             {
-                Console.WriteLine("|" + x.Name + " [" + String.Join(',', x.Transitions) + "]");
+                Debug.WriteLine("|" + x.Name + " [" + String.Join(',', x.Transitions) + "]");
             }
 
-            Console.WriteLine("\n\t>Program Loaded.\n");
+            Debug.WriteLine("\n\t>Program Loaded.\n");
 
 
             StateMachine.States.AddRange(States.Values);
@@ -700,7 +701,7 @@ namespace Avalon
 
             int lineNumber = 1;
 
-            Console.WriteLine("\t>Starting Parser and Interpreter...\n\n");
+            Debug.WriteLine("\t>Starting Parser and Interpreter...\n\n");
 
             foreach (var line in lines)
             {
@@ -718,7 +719,7 @@ namespace Avalon
                 {
                     createVariables = false;
                     hasCreatedVariables = true;
-                    Console.WriteLine("");
+                    Debug.WriteLine("");
                     continue;
                 }
 
@@ -727,7 +728,7 @@ namespace Avalon
                 {
                     createVariables = false;
                     hasCreatedVariables = true;
-                    Console.WriteLine("");
+                    Debug.WriteLine("");
                     continue;
                 }
 
@@ -744,7 +745,7 @@ namespace Avalon
 
                     importFunctions = false;
                     hasImportedFunctions = true;
-                    Console.WriteLine("");
+                    Debug.WriteLine("");
                     continue;
                 }
 
@@ -758,7 +759,7 @@ namespace Avalon
                 {
                     defineStates = false;
                     hasDefinedStates = true;
-                    Console.WriteLine("");
+                    Debug.WriteLine("");
                     continue;
                 }
                 if (x.ToLower().Trim() == "connect")
@@ -774,7 +775,7 @@ namespace Avalon
                 {
                     defineTransitions = false;
                     hasCreatedVariables = true;
-                    Console.WriteLine("");
+                    Debug.WriteLine("");
                     continue;
                 }
 
@@ -843,10 +844,10 @@ namespace Avalon
                         value = captureValue[1].Trim();
                     }
 
-                    // Console.WriteLine($"adding variable {name} ({variableType}) =  {value}.");
+                    // Debug.WriteLine($"adding variable {name} ({variableType}) =  {value}.");
 
                     // KeyTypeDefinition def = new KeyTypeDefinition(name, variableType, value);
-                    // Console.WriteLine($"adding variable {def.Key} ({def.Type}) =  {def.Value}.");
+                    // Debug.WriteLine($"adding variable {def.Key} ({def.Type}) =  {def.Value}.");
 
                     if (name == null)
                         throw new Exception($"Invalid variable definition. A valid name must be given after the definition. (at line {lineNumber})");
@@ -860,11 +861,11 @@ namespace Avalon
 
                     if (variableType == StateMachineVariableType.Text)
                     {
-                        Console.WriteLine($"adding variable {name} ({variableType}) = \"{value}\".");
+                        Debug.WriteLine($"adding variable {name} ({variableType}) = \"{value}\".");
                     }
                     else
                     {
-                        Console.WriteLine($"adding variable {name} ({variableType}) = {value}.");
+                        Debug.WriteLine($"adding variable {name} ({variableType}) = {value}.");
                     }
 
                     Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
@@ -897,7 +898,7 @@ namespace Avalon
 
                     if (isUsing)
                     {
-                        Console.WriteLine($"adding function {functionName}.");
+                        Debug.WriteLine($"adding function {functionName}.");
 
                         if (parameters.Count > 0 && currentFunction != null)
                         {
@@ -917,7 +918,7 @@ namespace Avalon
                     else
                     {
 
-                        Console.WriteLine($"adding parameter '{paramName}' to function insert '{insertFunParamName}' in function {currentFunction?.Name ?? "unknown"}.");
+                        Debug.WriteLine($"adding parameter '{paramName}' to function insert '{insertFunParamName}' in function {currentFunction?.Name ?? "unknown"}.");
 
                         if (currentFunction == null)
                             throw new Exception($"Invalid function definition. The function {functionName} does not exist. (at line {lineNumber})");
@@ -1015,7 +1016,7 @@ namespace Avalon
                         if (stateName == null || stateName == "")
                             throw new Exception($"Invalid fallback state definition. A valid name must be given after the definition. (at line {lineNumber})");
 
-                        // Console.WriteLine("creating fallback");
+                        // Debug.WriteLine("creating fallback");
 
                         // AddState(stateName, stateFunctionName);
                         AddFallBackState(stateName, stateFunctionName, StateMachine);
@@ -1053,20 +1054,20 @@ namespace Avalon
                 lineNumber++;
             }
 
-            Console.WriteLine("\t>Building State Machine...\n\n");
+            Debug.WriteLine("\t>Building State Machine...\n\n");
 
             if (!hasCreatedVariables)
             {
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No variables defined.");
-                Console.ResetColor();
+                //Debug.BackgroundColor = DebugColor.Yellow;
+                Debug.WriteLine("No variables defined.");
+                //Debug.ResetColor();
             }
 
             if (!hasImportedFunctions || functions.Count < 1)
             {
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("No functions defined.");
-                Console.ResetColor();
+                //Debug.BackgroundColor = DebugColor.Yellow;
+                Debug.WriteLine("No functions defined.");
+                //Debug.ResetColor();
             }
 
             if (!createdStart)
@@ -1079,11 +1080,11 @@ namespace Avalon
                 throw new Exception($"No fallback state defined.");
             }
 
-            Console.WriteLine("\t>Result:\n\n");
+            Debug.WriteLine("\t>Result:\n\n");
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Imported Functions:");
-            Console.ResetColor();
+            //Debug.ForegroundColor = DebugColor.Green;
+            Debug.WriteLine("Imported Functions:");
+            //Debug.ResetColor();
             foreach (var x in functions.Values)
             {
 
@@ -1096,19 +1097,19 @@ namespace Avalon
 
                 pmtrs = pmtrs.Trim().TrimEnd(',');
 
-                Console.WriteLine("|" + x.Name + " [" + pmtrs + "]");
+                Debug.WriteLine("|" + x.Name + " [" + pmtrs + "]");
             }
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n\nDefined States:");
-            Console.ResetColor();
+            //Debug.ForegroundColor = DebugColor.Green;
+            Debug.WriteLine("\n\nDefined States:");
+            //Debug.ResetColor();
 
             foreach (var x in States.Values)
             {
-                Console.WriteLine("|" + x.Name + " [" + String.Join(',', x.Transitions) + "]");
+                Debug.WriteLine("|" + x.Name + " [" + String.Join(',', x.Transitions) + "]");
             }
 
-            Console.WriteLine("\n\t>Program Loaded.\n");
+            Debug.WriteLine("\n\t>Program Loaded.\n");
 
             StateMachine.States.AddRange(States.Values);
 

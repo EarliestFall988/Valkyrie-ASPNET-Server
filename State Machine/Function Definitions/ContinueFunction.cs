@@ -16,6 +16,11 @@ namespace Avalon
         protected override void DefineFunction()
         {
             Name = "Continue";
+            Function = () =>
+            {
+                Console.WriteLine(Name);
+                return 0;
+            };
         }
     }
 }

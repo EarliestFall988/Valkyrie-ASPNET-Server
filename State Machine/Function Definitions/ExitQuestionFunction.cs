@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,13 +23,13 @@ namespace Avalon
             Func<int> ExitQuestion = () =>
             {
 
-                Console.WriteLine("Would you like to exit?");
-                string? answer = Console.ReadLine();
+                Debug.WriteLine("Would you like to exit?");
+                string? answer = "yes"; // Debug.ReadLine();
 
                 if (answer == null || answer.Trim() == "")
                     return 0;
 
-                // Console.WriteLine("You typed in " + number);
+                // Debug.WriteLine("You typed in " + number);
 
                 if (answer.Trim().ToLower() == "yes" || answer.Trim().ToLower() == "y") // exit the program
                 {
