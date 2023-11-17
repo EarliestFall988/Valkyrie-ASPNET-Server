@@ -12,12 +12,12 @@ namespace Valkyrie_Server
         /// <summary>
         /// The list of machines that are being handled by this task handler.
         /// </summary>
-        private Dictionary<string, StateMachine> Machines { get; set; } = new Dictionary<string, StateMachine>();
+        private Dictionary<string, (StateMachine machine, DateTime time)> Machines { get; set; } = new Dictionary<string, (StateMachine machine, DateTime time)>();
 
         /// <summary>
         /// get the active machines
         /// </summary>
-        public StateMachine[] GetMachines => Machines.Values.ToArray();
+        public (StateMachine machine, DateTime time)[] GetMachines => Machines.Values.ToArray();
 
         /// <summary>
         /// Is the state machine task handler running?
@@ -30,21 +30,18 @@ namespace Valkyrie_Server
         private Thread? TickThread { get; set; }
 
         /// <summary>
-        /// The state machine builder.
-        /// </summary>
-        StateMachineBuilder builder = new StateMachineBuilder();
-
-        /// <summary>
         /// Is the state machine ticking?
         /// </summary>
         public bool IsTicking => TickThread != null && TickThread.IsAlive;
 
+        public float TimoutSeconds { get; set; } = 60f;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public StateMachinesController()
+        public StateMachinesController(float timeoutSeconds)
         {
-            //StartThread();
+            TimoutSeconds = timeoutSeconds;
         }
 
         /// <summary>
@@ -62,10 +59,14 @@ namespace Valkyrie_Server
                 throw new ArgumentNullException("instructions");
 
 
-            var machine = builder.ParseInstructionsJSON(instructions);
-            Machines.Add(id, machine);
+            StateMachineBuilder builder = new StateMachineBuilder();
 
-            //Debug.WriteLine("added machine: " + id);
+            var machine = builder.ParseInstructionsJSON(instructions);
+            machine.IsRunning = true;
+            Machines.Add(id, (machine, DateTime.UtcNow));
+
+            if (!IsTicking)
+                Boot();
         }
 
         /// <summary>
@@ -77,38 +78,46 @@ namespace Valkyrie_Server
 
             foreach (var x in Machines)
             {
-                if (x.Value.CurrentState != x.Value.FallbackState)
+                if (!x.Value.machine.Completed)
                 {
+
+                    if((DateTime.UtcNow - x.Value.time).TotalSeconds > TimoutSeconds)
+                    {
+                        Debug.WriteLine("Killing state machine " + x.Key + " due to timeout");
+                        KillStateMachineProcess(x.Key);
+                        continue;
+                    }
+
                     try
                     {
                         Debug.WriteLine("Evaluating");
-                        x.Value.Evaluate();
+                        x.Value.machine.Evaluate();
                     }
                     catch (Exception ex)
                     {
-                        x.Value.IsRunning = false;
-                        x.Value.CurrentState = x.Value.FallbackState;
+                        x.Value.machine.IsRunning = false;
+                        x.Value.machine.CurrentState = x.Value.machine.FallbackState;
 
 
 
                         try
                         {
-                            x.Value.Evaluate();
+                            x.Value.machine.Evaluate();
                         }
                         catch (Exception ex2)
                         {
-                            x.Value.Result = "bru - Error running: " + ex2.Message;
+                            x.Value.machine.Result = "bru - Error running: " + ex2.Message;
                         }
 
 
-                        x.Value.Result = "Error running: " + ex.Message;
+                        x.Value.machine.Result = "Error running: " + ex.Message;
                     }
                 }
             }
 
             try
             {
-                Thread.Sleep(100); //force the thread to sleep so other threads can execute (kinda like a video game serverside tick).
+                Thread.Sleep(0); //force the thread to sleep so other threads can execute (kinda like a video game serverside tick).
                 Tick();
             }
             catch (Exception ex)
@@ -129,10 +138,10 @@ namespace Valkyrie_Server
                 return (false, "does not contain the key");
             }
 
-            if (Machines[id].CurrentState == Machines[id].FallbackState)
+            if (Machines[id].machine.Completed)
             {
-                Machines[id].IsRunning = false;
-                string res = Machines[id].Result;
+                Machines[id].machine.IsRunning = false;
+                string res = Machines[id].machine.Result;
                 Machines.Remove(id);
 
 
@@ -159,12 +168,12 @@ namespace Valkyrie_Server
 
             if (Machines.ContainsKey(id))
             {
-                Machines[id].IsRunning = false;
+                Machines[id].machine.IsRunning = false;
                 var machine = Machines[id];
 
                 //could be dangerous...
-                machine.CurrentState = machine.FallbackState;
-                machine.Evaluate();
+                machine.machine.CurrentState = machine.machine.FallbackState;
+                machine.machine.Evaluate();
                 //
 
                 Machines.Remove(id);
@@ -176,7 +185,7 @@ namespace Valkyrie_Server
                 if (Machines.Count > 0)
                     Boot();
 
-                return machine.CurrentState;
+                return machine.machine.CurrentState;
             }
 
             return null;

@@ -18,6 +18,9 @@ namespace Valkyrie_Server
 
         public async Task<(bool result, string content)> TryGetInstructions(string instructionId)
         {
+
+            //Debug.WriteLine("\n\n\t" + instructionId + "\n");
+
             using HttpClient client = new();
 
             var data = JsonSerializer.Serialize(new Content()

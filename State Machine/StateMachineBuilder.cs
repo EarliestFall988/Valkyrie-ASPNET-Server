@@ -26,7 +26,7 @@ namespace Avalon
         public Dictionary<string, string> stringRefDict = new Dictionary<string, string>();
         public Dictionary<string, float> floatRefDict = new Dictionary<string, float>();
 
-        string FilePath = "";
+        //string FilePath = "";
 
         public StateMachineBuilder()
         {
@@ -668,6 +668,11 @@ namespace Avalon
 
             Debug.WriteLine("\n\t>Program Loaded.\n");
 
+
+            foreach(var x in functions.Values)
+            {
+                x.StateMachine = StateMachine;
+            }
 
             StateMachine.States.AddRange(States.Values);
             StateMachine.Variables = Variables;

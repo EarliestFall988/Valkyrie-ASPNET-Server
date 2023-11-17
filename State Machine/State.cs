@@ -13,6 +13,7 @@ namespace Avalon
         /// <returns></returns>
         public List<Transition> Transitions = new List<Transition>();
 
+
         /// <summary>
         /// The name of the state
         /// </summary>

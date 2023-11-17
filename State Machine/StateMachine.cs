@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 namespace Avalon
 {
     /// <summary>
@@ -45,6 +47,13 @@ namespace Avalon
         public bool IsRunning { get; set; } = false;
 
         /// <summary>
+        /// is the state machine completed the task?
+        /// </summary>
+        public bool Completed { get; private set; } = false;
+
+        public bool Error { get; private set; } = false;
+
+        /// <summary>
         /// Creates a new state machine with the given initial state and fallback state.
         /// </summary>
         /// <param name="initialState"></param>
@@ -71,7 +80,7 @@ namespace Avalon
             // if (Store == string.Empty)
             // {
             //     Console.ForegroundColor = ConsoleColor.Red;
-            //     Console.WriteLine("The Store is empty");
+            //     Debug.WriteLine("The Store is empty");
             //     Console.ResetColor();
             //     return;
             // }
@@ -79,7 +88,7 @@ namespace Avalon
             // if (FallbackState == null || InitialState == null)
             // {
             //     Console.ForegroundColor = ConsoleColor.Red;
-            //     Console.WriteLine("the fallback state or initial state is null");
+            //     Debug.WriteLine("the fallback state or initial state is null");
             //     Console.ResetColor();
             //     return;
             // }
@@ -89,7 +98,7 @@ namespace Avalon
             if (CurrentState != null && !CurrentState.active)
                 CurrentState.active = true;
 
-            Console.WriteLine("\t>Start\n\n");
+            Debug.WriteLine("\t>Start\n\n");
 
             IsRunning = true;
 
@@ -98,7 +107,7 @@ namespace Avalon
                 Evaluate();
             }
 
-            Console.WriteLine("\n\n\t>End");
+            Debug.WriteLine("\n\n\t>End");
         }
 
         /// <summary>
@@ -107,17 +116,18 @@ namespace Avalon
         public void Evaluate()
         {
 
-            if (!IsRunning)
+            if (!IsRunning && !Completed)
             {
-                Console.WriteLine("the state machine is not running - falling back.");
+                Debug.WriteLine("the state machine is not running - falling back.");
                 CurrentState = FallbackState;
+                Error = true;
                 return;
             }
 
-            if (CurrentState == null)
+            if (CurrentState == null && InitialState != null)
             {
                 // throw new NullReferenceException("the current state is null");
-                Console.WriteLine("the current state is null, booting to start state.");
+                Debug.WriteLine("the current state is null, booting to start state.");
                 CurrentState = InitialState;
             }
 
@@ -125,36 +135,34 @@ namespace Avalon
                 throw new NullReferenceException("cannot boot to start state");
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"------------------[{CurrentState.Name}]------------------");
+            Debug.WriteLine($"------------------[{CurrentState.Name}]------------------");
             Console.ResetColor();
-            Console.WriteLine();
+            Debug.WriteLine("");
 
-            Console.WriteLine("current state: " + CurrentState.Name);
-
-            if (CurrentState == null)
-                throw new NullReferenceException("the current state is null");
+            Debug.WriteLine("current state: " + CurrentState.Name);
 
             try
             {
-                int result = CurrentState.Function();
+                int result = CurrentState.Function(); // execute the function
 
                 if (CurrentState == FallbackState)
                 {
-                    Console.WriteLine("the current state is the fallback state, exiting.");
+                    Debug.WriteLine("the current state is the fallback state, exiting.");
+                    Completed = true;
                     return;
                 }
 
-                // Console.WriteLine("Result: " + result);
-                State? nextState = CurrentState.EvaluateTransitions(result);
+                // Debug.WriteLine("Result: " + result);
+                State? nextState = CurrentState.EvaluateTransitions(result); // get the next transition
 
 
-                // Console.WriteLine("Next State: " + nextState?.Name);
+                // Debug.WriteLine("Next State: " + nextState?.Name);
 
-                // Console.WriteLine(Store);
+                // Debug.WriteLine(Store);
 
-                if (nextState != null && nextState != CurrentState)
+                if (nextState != null && nextState != CurrentState) //transtion...
                 {
-                    // Console.WriteLine("transitioning to: " + nextState.Name);
+                    // Debug.WriteLine("transitioning to: " + nextState.Name);
 
                     CurrentState.active = false;
                     CurrentState = nextState;
@@ -162,18 +170,18 @@ namespace Avalon
                 }
 
 
-                if (nextState == null)
+                if (nextState == null) //bru
                 {
-                    Console.WriteLine($"cannot transition to next state from {CurrentState.Name} -> result: {result}; exiting via fallback state.");
+                    Debug.WriteLine($"cannot transition to next state from {CurrentState.Name} -> result: {result}; exiting via fallback state.");
                     CurrentState = FallbackState;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // bru
             {
                 if (CurrentState == null)
                     throw new NullReferenceException("the current state is null");
 
-                Console.WriteLine($"Error in state {CurrentState.Name}: {ex.Message}");
+                Debug.WriteLine($"Error in state {CurrentState.Name}: {ex.Message}");
                 CurrentState = FallbackState;
             }
         }
@@ -191,7 +199,7 @@ namespace Avalon
             if (data.Contains(","))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: Cannot write a value to the store with a comma");
+                Debug.WriteLine("Error: Cannot write a value to the store with a comma");
                 Console.ResetColor();
                 return false;
             }
@@ -208,20 +216,20 @@ namespace Avalon
                     lines[row] = string.Join(',', cells);
                     string result = string.Join('\n', lines);
                     Store = result;
-                    // Console.WriteLine(data);
+                    // Debug.WriteLine(data);
                     return true;
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Error: Cells is null for this line.");
+                    Debug.WriteLine("Error: Cells is null for this line.");
                     Console.ResetColor();
                 }
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: This line does not exist.");
+                Debug.WriteLine("Error: This line does not exist.");
                 Console.ResetColor();
             }
 
@@ -261,7 +269,7 @@ namespace Avalon
 
         public void Boot()
         {
-            Console.WriteLine("\n\tRun Program?\n");
+            Debug.WriteLine("\n\tRun Program?\n");
             string? result = Console.ReadLine();
 
             if (result != null && (result.Trim().ToLower() == "yes" || result.Trim().ToLower() == "y"))
@@ -270,10 +278,10 @@ namespace Avalon
             }
             else
             {
-                Console.WriteLine("\n\t>Canceled.");
+                Debug.WriteLine("\n\t>Canceled.");
             }
 
-            Console.WriteLine("\n\n\t>Exiting...");
+            Debug.WriteLine("\n\n\t>Exiting...");
 
         }
     }

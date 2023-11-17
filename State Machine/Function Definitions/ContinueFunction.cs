@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
+using System.Diagnostics;
 
 namespace Avalon
 {
@@ -18,7 +14,12 @@ namespace Avalon
             Name = "Continue";
             Function = () =>
             {
-                Console.WriteLine(Name);
+                if (StateMachine != null)
+                    StateMachine.Result = "yayayayaya!!";
+                else
+                    Debug.WriteLine("state machine is null");
+
+                Debug.WriteLine("\n\tEvaluating default function!!!");
                 return 0;
             };
         }

@@ -14,10 +14,20 @@ namespace Avalon
         public Func<int> Function { get; set; } = () => { return 0; }; //default function
 
         /// <summary>
+        /// The state machine that this function is a part of
+        /// </summary>
+        public StateMachine? StateMachine { get; set; } = null;
+
+        /// <summary>
         /// The name of the function
         /// </summary>
         /// <value></value>
         public string Name { get; set; } = "";
+
+        /// <summary>
+        /// the description of the function
+        /// </summary>
+        public string Description { get; set; } = "";
 
         /// <summary>
         /// The dictionary of expected parameters and types

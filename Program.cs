@@ -1,6 +1,9 @@
+using Avalon;
+
 using Microsoft.AspNetCore.Mvc;
 
 using System.Diagnostics;
+using System.Text.Json;
 
 using Valkyrie_Server;
 
@@ -16,9 +19,11 @@ var app = builder.Build();
 var apiKey = "some api key";
 var valkApiKey = "some key";
 
-StateMachinesController? stateMachinesController = new StateMachinesController();
 
 long minuteCountWaitTime = 5;
+StateMachinesController? stateMachinesController = new StateMachinesController(minuteCountWaitTime);
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -26,6 +31,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 
@@ -36,6 +43,8 @@ var summaries = new[]
 
 app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
 {
+
+    context.RequestAborted.ThrowIfCancellationRequested();
 
     var instructionId = context.Request.RouteValues["id"] as string;
     string key = context.Request.Headers["apikey"];
@@ -75,14 +84,6 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
 
     string id = Guid.NewGuid().ToString();
 
-    if (!stateMachinesController.IsTicking)
-    {
-        stateMachinesController.Boot();
-    }
-
-
-    //Debug.WriteLine(response.content);
-
 
     stateMachinesController.AddMachine(id, response.content);
 
@@ -91,16 +92,16 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
     long tick = 0;
 
 
-    var totalTime = 100; //(60000 / 2) * minuteCountWaitTime;
+    var totalTime = (60000 / 2) * minuteCountWaitTime;
 
-    while (!status.complete && tick < totalTime)
+    while (!status.complete && tick < totalTime && !context.RequestAborted.IsCancellationRequested)
     {
 
-       Debug.WriteLine("status: " + status.complete + " " + tick);
+        Debug.WriteLine("status: " + status.complete + " " + tick);
 
         status = stateMachinesController.HandleStatus(id);
 
-        Thread.Sleep(100); // wait for the machine to complete
+        Thread.Sleep(0); // wait for the machine to complete
         tick++;
     }
 
@@ -117,9 +118,18 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
         return status.result;
     }
 
+    if (context.RequestAborted.IsCancellationRequested)
+    {
+        Debug.WriteLine("request aborted");
+        stateMachinesController.KillStateMachineProcess(id);
+        context.Response.StatusCode = 408;
+        return "";
+    }
+
     if (status.complete)
     {
         context.Response.StatusCode = 200;
+        context.Response.Headers.Add("Content-Type", "application/json");
         return status.result;
     }
     else
@@ -129,23 +139,78 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
     }
 });
 
-app.MapGet("/weatherforecast", () =>
+
+app.MapGet("/api/v1/functions", (HttpContext context) =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateTime.Now.AddDays(index),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+
+    string key = context.Request.Headers["apikey"];
+
+    if (key == null)
+    {
+        context.Response.StatusCode = 401;
+        return "No API key provided";
+    }
+
+    if (apiKey != key)
+    {
+        context.Response.StatusCode = 401;
+        return "incorrect api key";
+    }
+
+    var lib = new FunctionLibrary();
+
+    try
+    {
+
+        var result = JsonSerializer.Serialize(lib.ImportedFunctions.Select(x =>
+        {
+            return new FunctionListItem(x.Key, x.Value.Description, x.Value.ExpectedParameters.Select(x => x.Value).ToArray());
+        }));
+
+
+        context.Response.Headers.Add("Content-Type", "application/json");
+        context.Response.StatusCode = 200;
+        return result;
+    }
+    catch (Exception e)
+    {
+        context.Response.StatusCode = 500;
+        return e.Message;
+    }
+});
 
 app.Run();
 
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+
+/// <summary>
+/// The content of the request to the Valkyrie server.
+/// </summary>
+/// <param name="Name">The name of the function</param>
+/// <param name="Description">The description of the function</param>
+/// <param name="Parameters">the parameters of the function</param>
+internal record FunctionListItem(string Name, string Description, ReferenceTuple[] Parameters);
+
+
+#region stuff
+
+//app.MapGet("/weatherforecast", () =>
+//{
+//    var forecast = Enumerable.Range(1, 5).Select(index =>
+//        new WeatherForecast
+//        (
+//            DateTime.Now.AddDays(index),
+//            Random.Shared.Next(-20, 55),
+//            summaries[Random.Shared.Next(summaries.Length)]
+//        ))
+//        .ToArray();
+//    return forecast;
+//})
+//.WithName("GetWeatherForecast");
+
+
+//internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
+//{
+//    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+//}
+
+#endregion
