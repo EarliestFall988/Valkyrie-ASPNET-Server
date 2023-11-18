@@ -15,11 +15,3 @@ primary_region = "dfw"
   auto_start_machines = true
   min_machines_running = 0
   processes = ["app"]
-
-  [checks]
-	[checks.http]
-	  interval = 10000
-	  timeout = 2000
-	  method = "GET"
-	  path = "/"
-	  protocol = "http"
