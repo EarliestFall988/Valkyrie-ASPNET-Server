@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for valkyrie-server on 2023-11-18T11:41:19-06:00
+# fly.toml app configuration file generated for valkyrie-server-solitary-sun-1989 on 2023-11-18T11:49:50-06:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "valkyrie-server"
+app = "valkyrie-server-solitary-sun-1989"
 primary_region = "dfw"
 
 [build]
@@ -15,3 +15,11 @@ primary_region = "dfw"
   auto_start_machines = true
   min_machines_running = 0
   processes = ["app"]
+
+  [checks]
+	[checks.http]
+	  interval = 10000
+	  timeout = 2000
+	  method = "GET"
+	  path = "/"
+	  protocol = "http"
