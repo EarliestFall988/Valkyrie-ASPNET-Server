@@ -9,10 +9,12 @@ using Valkyrie_Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var appsetting = new ConfigurationBuilder()
+var env = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json")
     .Build();
+
+var splash = "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <title>It Works!!</title>\r\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\r\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\">\r\n</head>\r\n<style>\r\n    .body {\r\n        background-color: #171717;\r\n        width: 90vw;\r\n        height: 90vh;\r\n        color: #ffffff;\r\n        padding: 3rem;\r\n        font-family: 'Roboto', sans-serif;\r\n        display: block;\r\n        box-sizing: border-box;\r\n    }\r\n\r\n    h1 {\r\n        font-size: 3rem;\r\n    }\r\n\r\n    p {\r\n        font-size: 1.25rem;\r\n    }\r\n\r\n    a {\r\n        font-size: 1.25rem;\r\n        color: #ffff;\r\n        text-decoration: none;\r\n        background-color: #1d4ed8;\r\n        padding: 0.25rem;\r\n        border-radius: 0.25rem;\r\n    }\r\n\r\n</style>\r\n<body class=\"body\">\r\n    <h1>It Works!</h1>\r\n    <p>Copy the link in your browser and paste it back in the Valkyrie Connection Page</p>\r\n    <p>or</p>\r\n    <a href=\"/api/v1/sync\">Sync Manually</a>\r\n</body>\r\n</html>";
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -21,15 +23,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-var apiKey = appsetting["API_KEY"];
+var apiKey = env["API_KEY"];
 var valkApiKey = "some key";
-
-Debug.WriteLine("\napi key: " + apiKey + "\n");
 
 
 long minuteCountWaitTime = 5;
 StateMachinesController? stateMachinesController = new StateMachinesController(minuteCountWaitTime);
-
 
 
 // Configure the HTTP request pipeline.
@@ -40,19 +39,25 @@ if (app.Environment.IsDevelopment())
 }
 
 
-
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+//var summaries = new[]
+//{
+//    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+//};
 
 app.MapGet("/", (HttpContext ctx) =>
 {
+    ctx.Response.Headers.Add("Content-Type", "text/html");
+    ctx.Response.StatusCode = 200;
+    return splash;
+});
+
+app.MapGet("/api/v1/sync", (HttpContext ctx) =>
+{
     ctx.Response.Headers.Add("Content-Type", "application/json");
     ctx.Response.StatusCode = 200;
-    return JsonSerializer.Serialize(new message("Hello World!"));
+    return JsonSerializer.Serialize(new message("Syncing"));
 });
 
 
