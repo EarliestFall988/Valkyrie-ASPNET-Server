@@ -9,6 +9,11 @@ using Valkyrie_Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var appsetting = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
+    .Build();
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -16,8 +21,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-var apiKey = Environment.GetEnvironmentVariable("API_KEY");
+var apiKey = appsetting["API_KEY"];
 var valkApiKey = "some key";
+
+Debug.WriteLine("\napi key: " + apiKey + "\n");
 
 
 long minuteCountWaitTime = 5;
@@ -43,6 +50,7 @@ var summaries = new[]
 
 app.MapGet("/", (HttpContext ctx) =>
 {
+    ctx.Response.Headers.Add("Content-Type", "application/json");
     ctx.Response.StatusCode = 200;
     return JsonSerializer.Serialize(new message("Hello World!"));
 });
