@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-var apiKey = "some api key";
+var apiKey = Environment.GetEnvironmentVariable("API_KEY");
 var valkApiKey = "some key";
 
 
@@ -40,6 +40,13 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+
+app.MapGet("/", (HttpContext ctx) =>
+{
+    ctx.Response.StatusCode = 200;
+    return JsonSerializer.Serialize(new message("Hello World!"));
+});
+
 
 app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
 {
@@ -72,8 +79,6 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
         ValkyrieAPIKey = valkApiKey
     };
 
-
-
     var response = await ValkyireServerController.TryGetInstructions(instructionId);
 
     if (response.result == false)
@@ -83,7 +88,6 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
     }
 
     string id = Guid.NewGuid().ToString();
-
 
     stateMachinesController.AddMachine(id, response.content);
 
@@ -189,6 +193,9 @@ app.Run();
 /// <param name="Description">The description of the function</param>
 /// <param name="Parameters">the parameters of the function</param>
 internal record FunctionListItem(string Name, string Description, ReferenceTuple[] Parameters);
+
+internal record message(string content);
+
 
 
 #region stuff
