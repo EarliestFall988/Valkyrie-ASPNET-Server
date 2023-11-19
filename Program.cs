@@ -213,7 +213,6 @@ app.MapGet("/api/v1/functions", (HttpContext context) =>
     }
 
 
-
     try
     {
         context.Response.Headers.Add("Content-Type", "application/json");
