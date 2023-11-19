@@ -53,11 +53,49 @@ app.MapGet("/", (HttpContext ctx) =>
     return splash;
 });
 
-app.MapGet("/api/v1/sync", (HttpContext ctx) =>
+app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
 {
+
+    ctx.RequestAborted.ThrowIfCancellationRequested();
+
+    var instructionId = ctx.Request.RouteValues["id"] as string;
+    string key = ctx.Request.Headers["apikey"];
+
+    if (string.IsNullOrEmpty(key))
+    {
+        ctx.Response.StatusCode = 401;
+        return "No API key provided";
+    }
+
+    if (apiKey != key)
+    {
+        ctx.Response.StatusCode = 401;
+        return "incorrect api key";
+    }
+
+    if (string.IsNullOrEmpty(instructionId))
+    {
+        ctx.Response.StatusCode = 400;
+        return "No instruction ID provided";
+    }
+
     ctx.Response.Headers.Add("Content-Type", "application/json");
-    ctx.Response.StatusCode = 200;
-    return JsonSerializer.Serialize(new message("Syncing"));
+
+    ValkyrieServerController valkyrieServerController = new ValkyrieServerController()
+    {
+        ValkyrieAPIKey = valkApiKey
+    };
+
+    var res = await valkyrieServerController.UpdateInstructionFunctionDefinitions(instructionId);
+
+    if (res.statusCode == "200")
+    {
+        ctx.Response.StatusCode = 200;
+        return JsonSerializer.Serialize(new message("Syncing"));
+    }
+
+    ctx.Response.StatusCode = int.Parse(res.statusCode);
+    return JsonSerializer.Serialize(new message(res.response));
 });
 
 
@@ -174,20 +212,13 @@ app.MapGet("/api/v1/functions", (HttpContext context) =>
         return "incorrect api key";
     }
 
-    var lib = new FunctionLibrary();
+
 
     try
     {
-
-        var result = JsonSerializer.Serialize(lib.ImportedFunctions.Select(x =>
-        {
-            return new FunctionListItem(x.Key, x.Value.Description, x.Value.ExpectedParameters.Select(x => x.Value).ToArray());
-        }));
-
-
         context.Response.Headers.Add("Content-Type", "application/json");
         context.Response.StatusCode = 200;
-        return result;
+        return DiscoverFunctionsHandler.GetFunctionDefinitionsJSON();
     }
     catch (Exception e)
     {
