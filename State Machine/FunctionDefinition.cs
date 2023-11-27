@@ -37,6 +37,24 @@ namespace Avalon
         public Dictionary<string, ReferenceTuple> ExpectedParameters { get; set; } = new Dictionary<string, ReferenceTuple>();
 
         /// <summary>
+        /// Get the list of expected parameters
+        /// </summary>
+        public ExpectedParameter[] ExpectedParametersList
+        {
+            get
+            {
+                List<ExpectedParameter> parameters = new List<ExpectedParameter>();
+
+                foreach (var x in ExpectedParameters)
+                {
+                    parameters.Add(new ExpectedParameter(x.Key, x.Value.type.ToString()));
+                }
+
+                return parameters.ToArray();
+            }
+        }
+
+        /// <summary>
         /// The dictionary of parameters
         /// </summary>
         /// <value></value>
@@ -107,6 +125,24 @@ namespace Avalon
 
             result = StateMachineVariableType.Text;
             return false;
+        }
+    }
+
+    /// <summary>
+    /// A struct representing an expected parameter
+    /// </summary>
+    public struct ExpectedParameter
+    {
+        public string Name { get; init; }
+        public string Type { get; init; }
+
+        public string Description { get; init; }
+
+        public ExpectedParameter(string name, string type, string description = "")
+        {
+            Name = name;
+            Type = type;
+            Description = description;
         }
     }
 }

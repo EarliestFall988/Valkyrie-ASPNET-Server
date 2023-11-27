@@ -14,7 +14,7 @@ namespace Avalon
         public StateMachineVariableType type { get; set; }
         public bool applied { get; set; }
 
-        public ReferenceTuple(StateMachineVariableType type, bool applied)
+        public ReferenceTuple(StateMachineVariableType type, bool applied, string description = "")
         {
             this.type = type;
             this.applied = applied;

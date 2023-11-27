@@ -58,8 +58,6 @@ app.MapGet("/", (HttpContext ctx) =>
 app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
 {
 
-    ctx.RequestAborted.ThrowIfCancellationRequested();
-
     string instructionId = ctx.Request.Headers["id"];
     string key = ctx.Request.Headers["apikey"];
 
@@ -83,23 +81,27 @@ app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
         return JsonSerializer.Serialize(new message("No instruction ID provided"));
     }
 
-    ctx.Response.Headers.Add("Content-Type", "application/json");
-
+    Debug.WriteLine("test 1");
+    
     ValkyrieServerController valkyrieServerController = new ValkyrieServerController()
     {
         ValkyrieAPIKey = valkApiKey
     };
 
+
+    Debug.WriteLine("test 2");
+
     var res = await valkyrieServerController.UpdateInstructionFunctionDefinitions(instructionId);
 
-    if (res.statusCode == "200")
+    if (res.statusCode.ToLower() == "ok")
     {
         ctx.Response.StatusCode = 200;
-        return JsonSerializer.Serialize(new message("Syncing"));
+        return JsonSerializer.Serialize(new message("Synced!"));
     }
 
-    ctx.Response.StatusCode = int.Parse(res.statusCode);
-    return JsonSerializer.Serialize(new message(res.response));
+    ctx.Response.StatusCode = 500;
+
+    return JsonSerializer.Serialize(new errResult(res.response, res.statusCode));
 });
 
 
@@ -239,9 +241,10 @@ app.Run();
 /// <param name="Name">The name of the function</param>
 /// <param name="Description">The description of the function</param>
 /// <param name="Parameters">the parameters of the function</param>
-internal record FunctionListItem(string Name, string Description, ReferenceTuple[] Parameters);
+internal record FunctionListItem(string Name, string Description, ExpectedParameter[] Parameters);
 
 internal record message(string content);
+internal record errResult(string error, string reasonPhrase);
 
 
 

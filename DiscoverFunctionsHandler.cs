@@ -14,8 +14,8 @@ namespace Valkyrie_Server
         /// <returns>returns the json string of the functions</returns>
         public static string GetFunctionDefinitionsJSON() => JsonSerializer.Serialize(
             new FunctionLibrary().ImportedFunctions
-            .Select(x => new FunctionListItem(x.Key, x.Value.Description, x.Value.ExpectedParameters
-                    .Select(x => x.Value)
-                .ToArray())));
+            .Select(x =>
+            new FunctionListItem(x.Key, x.Value.Description, x.Value.ExpectedParametersList))
+            .ToArray());
     }
 }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 
@@ -20,16 +22,13 @@ namespace Avalon
         public Dictionary<string, FunctionDefinition> ImportedFunctions = new Dictionary<string, FunctionDefinition>();
 
         /// <summary>
-        /// Default constructor. Imports all functions.
+        /// Default constructor. Builds all functions.
         /// </summary>
-        public FunctionLibrary()
-        {
-            ImportFunctions();
-        }
+        public FunctionLibrary() => BuildFunctionLibrary();
 
-        public void ImportFunctions()
+        public void BuildFunctionLibrary()
         {
-            Console.WriteLine("\t>Gathering Functions...\n");
+            //Debug.WriteLine("\t>Gathering Functions...\n");
             ContinueFunction continueFunction = new ContinueFunction();
             ExitQuestionFunction exitQuestion = new ExitQuestionFunction();
             GreetUserFunction greetFunction = new GreetUserFunction();

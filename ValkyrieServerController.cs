@@ -12,15 +12,22 @@ namespace Valkyrie_Server
     public class ValkyrieServerController
     {
 
-        public static readonly Uri productionBaseUri = new Uri("https://valkyrie-nu.vercel.app/api/v1/getdata/", UriKind.Absolute);
-        public static readonly Uri testBaseUri = new Uri("http://localhost:3000/api/v1/getdata/", UriKind.Absolute);
+        public static readonly Uri prodGetDataURI = new Uri("https://valkyrie-nu.vercel.app/api/v1/getdata/", UriKind.Absolute);
+        public static readonly Uri testGetDataURI = new Uri("http://localhost:3000/api/v1/getdata/", UriKind.Absolute);
 
-        public static readonly Uri testURI = new Uri("http://localhost:5000/api/sm/guess", UriKind.Absolute);
+        public static readonly Uri testSyncFunctionsURI = new Uri("http://localhost:3000/api/v1/sync-functions", UriKind.Absolute);
+
+        public static readonly Uri testAPIURIThatICameBackFromThanksgivingAndCantRememberWhatItIsFor = new Uri("http://localhost:3000/api/sm/guess", UriKind.Absolute);
 
         /// <summary>
         /// the base URI for the Valkyrie server
         /// </summary>
-        private Uri selectedURI = testURI;
+        private Uri selectedURI = testGetDataURI;
+
+        public ValkyrieServerController()
+        {
+            
+        }
 
         /// <summary>
         ///  The API key for the Valkyrie server
@@ -79,23 +86,25 @@ namespace Valkyrie_Server
         /// </summary>
         /// <param name="instructionId"> the instruction ID</param>
         /// <returns> the result of the update</returns>
-        public async Task<(string response, string statusCode)> UpdateInstructionFunctionDefinitions(string instructionId)
+        public async Task<(string response, bool success, string statusCode)> UpdateInstructionFunctionDefinitions(string instructionId)
         {
 
             if (string.IsNullOrEmpty(instructionId))
             {
-                return ("Error: No instruction ID provided", "0");
+                return ("Error: No instruction ID provided", false, "0");
             }
 
-            using HttpClient client = new();
 
             var functionJSON = DiscoverFunctionsHandler.GetFunctionDefinitionsJSON();
+           Debug.WriteLine(functionJSON);
+            
+            using HttpClient client = new();
 
             HttpContent content = new StringContent(functionJSON);
 
-            var response = await client.PostAsync(selectedURI, content);
             client.DefaultRequestHeaders.Add("x-api-key", ValkyrieAPIKey);
             client.DefaultRequestHeaders.Add("x-instruction-id", instructionId);
+            var response = await client.PostAsync(testSyncFunctionsURI, content);
 
             using StreamReader reader = new StreamReader(response.Content.ReadAsStream());
 
@@ -103,15 +112,15 @@ namespace Valkyrie_Server
 
             if (!response.IsSuccessStatusCode)
             {
-                return ("Error: " + response.StatusCode + "\n" + responseString, response.StatusCode.ToString());
+                return ("Error: " + response.StatusCode + "\n" + responseString, false, response.StatusCode.ToString());
             }
 
             if (string.IsNullOrEmpty(responseString))
             {
-                return ("Error: Empty response from server", "0");
+                return ("Error: Empty response from server", false, "0");
             }
 
-            return (responseString, response.StatusCode.ToString());
+            return (responseString, response.IsSuccessStatusCode, response.ReasonPhrase ?? "");
         }
     }
 
