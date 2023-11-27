@@ -7,6 +7,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 </head>
+<script>
+
+    getURI = () => {
+        document.getElementById("link-to-paste").innerHTML = window.location.href + "api/v1/sync";
+    }
+
+</script>
 <style>
     .body {
         background-color: #171717;
@@ -23,6 +30,15 @@
         font-size: 3rem;
     }
 
+    h1, h2 {
+        user-select: none;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 200;
+    }
+
     p {
         font-size: 1.25rem;
     }
@@ -36,9 +52,21 @@
         border-radius: 0.25rem;
     }
 
+    .sync-link {
+        color: lightblue;
+        text-decoration: underline;
+        text-underline-offset: 0.25rem;
+        font-size: 1.5rem;
+    }
+
+    .no-select {
+        user-select: none;
+    }
 </style>
-<body class="body">
-    <h1>It Works!</h1>
-    <p>Copy the link in your browser and paste it back in the Valkyrie Connection Page</p>
+<body onload="getURI()" class="body">
+    <h1>It Works!🎉🎉</h1>
+    <h2>Copy the link below and paste it back in the Valkyrie Connection Page</h2>
+    <p> <span class="no-select">👉 </span><span id="link-to-paste" class="sync-link"></span></p>
+    <p class="no-select"><a href="https://google.com"> Go To Dashboard </a></p>
 </body>
 </html>
