@@ -14,7 +14,12 @@ var env = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
-var splash = "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <title>It Works!!</title>\r\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\r\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\">\r\n</head>\r\n<style>\r\n    .body {\r\n        background-color: #171717;\r\n        width: 90vw;\r\n        height: 90vh;\r\n        color: #ffffff;\r\n        padding: 3rem;\r\n        font-family: 'Roboto', sans-serif;\r\n        display: block;\r\n        box-sizing: border-box;\r\n    }\r\n\r\n    h1 {\r\n        font-size: 3rem;\r\n    }\r\n\r\n    p {\r\n        font-size: 1.25rem;\r\n    }\r\n\r\n    a {\r\n        font-size: 1.25rem;\r\n        color: #ffff;\r\n        text-decoration: none;\r\n        background-color: #1d4ed8;\r\n        padding: 0.25rem;\r\n        border-radius: 0.25rem;\r\n    }\r\n\r\n</style>\r\n<body class=\"body\">\r\n    <h1>It Works!</h1>\r\n    <p>Copy the link in your browser and paste it back in the Valkyrie Connection Page</p>\r\n    <p>or</p>\r\n    <a href=\"/api/v1/sync\">Sync Manually</a>\r\n</body>\r\n</html>";
+//    <p>or</p>\r\n    <a href=\"/api/v1/sync\">Sync Manually</a>\r\n
+
+string linkURI = env["VALK_DASHBOARD_LINK"];
+
+var splash = "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <title>It Works!!</title>\r\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\r\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\">\r\n</head>\r\n<style>\r\n    .body {\r\n        background-color: #171717;\r\n        width: 90vw;\r\n        height: 90vh;\r\n        color: #ffffff;\r\n        padding: 3rem;\r\n        font-family: 'Roboto', sans-serif;\r\n        display: block;\r\n        box-sizing: border-box;\r\n    }\r\n\r\n    h1 {\r\n        font-size: 3rem;\r\n    }\r\n\r\n    p {\r\n        font-size: 1.25rem;\r\n    }\r\n\r\n    a {\r\n        font-size: 1.25rem;\r\n        color: #ffff;\r\n        text-decoration: none;\r\n        background-color: #1d4ed8;\r\n        padding: 0.25rem;\r\n        border-radius: 0.25rem;\r\n    }\r\n\r\n</style>\r\n<body class=\"body\">\r\n " +
+    $"<h1>It Works!</h1>\r\n    <p>Copy the link in your browser and paste it back in the Valkyrie Connection Page</p> <p>  <a href=\"{linkURI ?? "https://google.com"}\"> Go To Dashboard </a> </p>\r\n</body>\r\n</html>";
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -103,7 +108,7 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
 {
 
     context.RequestAborted.ThrowIfCancellationRequested();
-
+    
     var instructionId = context.Request.RouteValues["id"] as string;
     string key = context.Request.Headers["apikey"];
 
