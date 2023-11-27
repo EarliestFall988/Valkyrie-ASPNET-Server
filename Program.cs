@@ -60,7 +60,7 @@ app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
 
     ctx.RequestAborted.ThrowIfCancellationRequested();
 
-    var instructionId = ctx.Request.RouteValues["id"] as string;
+    var instructionId = ctx.Request.Headers["id"] as string;
     string key = ctx.Request.Headers["apikey"];
 
     ctx.Response.Headers.Add("Content-Type", "application/json");
