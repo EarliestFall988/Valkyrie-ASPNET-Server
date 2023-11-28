@@ -15,6 +15,7 @@ namespace Valkyrie_Server
         public static readonly Uri prodGetDataURI = new Uri("https://valkyrie-nu.vercel.app/api/v1/getdata/", UriKind.Absolute);
         public static readonly Uri testGetDataURI = new Uri("http://localhost:3000/api/v1/getdata/", UriKind.Absolute);
 
+        public static readonly Uri prodSyncFunctionsURITestBranch = new Uri("https://valkyrie-git-get-functions-from-server-earliestfall988.vercel.app/api/v1/sync-functions", UriKind.Absolute);
         public static readonly Uri testSyncFunctionsURI = new Uri("http://localhost:3000/api/v1/sync-functions", UriKind.Absolute);
 
         public static readonly Uri testAPIURIThatICameBackFromThanksgivingAndCantRememberWhatItIsFor = new Uri("http://localhost:3000/api/sm/guess", UriKind.Absolute);
@@ -26,7 +27,7 @@ namespace Valkyrie_Server
 
         public ValkyrieServerController()
         {
-            
+
         }
 
         /// <summary>
@@ -96,15 +97,15 @@ namespace Valkyrie_Server
 
 
             var functionJSON = DiscoverFunctionsHandler.GetFunctionDefinitionsJSON();
-           Debug.WriteLine(functionJSON);
-            
+            Debug.WriteLine(functionJSON);
+
             using HttpClient client = new();
 
             HttpContent content = new StringContent(functionJSON);
 
             client.DefaultRequestHeaders.Add("x-api-key", ValkyrieAPIKey);
             client.DefaultRequestHeaders.Add("x-instruction-id", instructionId);
-            var response = await client.PostAsync(testSyncFunctionsURI, content);
+            var response = await client.PostAsync(prodSyncFunctionsURITestBranch, content);
 
             using StreamReader reader = new StreamReader(response.Content.ReadAsStream());
 
