@@ -28,7 +28,10 @@ namespace Avalon
 
         public void BuildFunctionLibrary()
         {
-            //Debug.WriteLine("\t>Gathering Functions...\n");
+            Debug.WriteLine("\t>Gathering Functions...\n");
+
+            #region simple guess game tutorial functions
+
             ContinueFunction continueFunction = new ContinueFunction();
             ExitQuestionFunction exitQuestion = new ExitQuestionFunction();
             GreetUserFunction greetFunction = new GreetUserFunction();
@@ -41,6 +44,25 @@ namespace Avalon
             ImportedFunctions.Add(greetFunction.Name, greetFunction);
             ImportedFunctions.Add(guessFunction.Name, guessFunction);
             ImportedFunctions.Add(randomFunction.Name, randomFunction);
+
+            #endregion
+
+            #region math functions
+
+            var addNumber = new AddNumber();
+            var subtractNumber = new SubtractNumber();
+            var multiplyNumber = new MultiplyNumber();
+            var divideNumber = new DivideNumber();
+            var powerNumber = new PowNumber();
+
+            ImportedFunctions.Add(addNumber.Name, addNumber);
+            ImportedFunctions.Add(subtractNumber.Name, subtractNumber);
+            ImportedFunctions.Add(divideNumber.Name, divideNumber);
+            ImportedFunctions.Add(multiplyNumber.Name, multiplyNumber);
+            ImportedFunctions.Add(powerNumber.Name, powerNumber);
+
+            #endregion
+
         }
 
         /// <summary>

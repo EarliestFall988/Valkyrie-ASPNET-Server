@@ -14,10 +14,20 @@ namespace Avalon
         public StateMachineVariableType type { get; set; }
         public bool applied { get; set; }
 
-        public ReferenceTuple(StateMachineVariableType type, bool applied, string description = "")
+        public VariableIO VariableIO { get; set; }
+
+        public ReferenceTuple(StateMachineVariableType type, bool applied, VariableIO io = VariableIO.In, string description = "")
         {
             this.type = type;
             this.applied = applied;
+            this.VariableIO = io;
         }
+    }
+
+
+    public enum VariableIO
+    {
+        In,
+        Out
     }
 }

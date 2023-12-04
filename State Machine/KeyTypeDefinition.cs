@@ -91,6 +91,11 @@ namespace Avalon
         {
             this.Value = value;
         }
+
+        public void SetValue(decimal value)
+        {
+            this.Value = value.ToString();
+        }
     }
 
     /// <summary>
