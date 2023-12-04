@@ -21,9 +21,9 @@ namespace Avalon
 
             Name = "GreetUser";
 
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
+            ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "name", new ReferenceTuple(StateMachineVariableType.Text, false) }
+                { "name", new Parameter(StateMachineVariableType.Text) }
             };
 
             Func<int> GreetUser = () =>
@@ -37,25 +37,28 @@ namespace Avalon
                     Debug.WriteLine("What is your Name?");
                     result = "John Doe"; // Console.ReadLine();
 
-                    if (result == null || result == string.Empty)
-                    {
-                        Debug.WriteLine("That's not your name!");
-                    }
+                    var nameV = Parameters["name"];
 
-                    if (result?.ToLower().Trim() == "exit")
+                    if (nameV is VariableDefinition<string> name)
+                    {
+
+                        if (result == null || result == string.Empty)
+                        {
+                            Debug.WriteLine("That's not your name!");
+                        }
+
+                        if (result?.ToLower().Trim() == "exit")
+                        {
+                            return -1;
+                        }
+
+                        name.Value = result?.Replace(',', '\'') ?? "";
+
+                    }
+                    else
                     {
                         return -1;
                     }
-
-                    // bool success = stateMachine.WriteValue(0, 0, result?.Replace(',', '\'') ?? "");
-
-                    Parameters["name"].SetValue(result?.Replace(',', '\'') ?? "");
-
-                    // if (!success)
-                    // {
-                    //     Debug.WriteLine("could not write to store");
-                    //     return -1;
-                    // }
                 }
 
                 return 1;

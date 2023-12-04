@@ -4,12 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
+
 namespace Avalon
 {
     /// <summary>
     /// The Key Type Definition handles the type of the key, name, and the value of the key.
     /// </summary>
-    public class KeyTypeDefinition
+    public class KeyTypeDefinition : IVariableType
     {
         /// <summary>
         /// The name of the key.
@@ -29,6 +30,10 @@ namespace Avalon
         /// <value></value>
         public string Value { get; private set; } = "";
 
+        /// <summary>
+        /// Is the value an out value?
+        /// </summary>
+        public VariableIO IO { get; set; } = VariableIO.In;
 
         /// <summary>
         /// Default constructor.
@@ -96,16 +101,28 @@ namespace Avalon
         {
             this.Value = value.ToString();
         }
-    }
 
-    /// <summary>
-    /// The type of the key.
-    /// </summary>
-    public enum StateMachineVariableType
-    {
-        Text, //text
-        Decimal, //decimal
-        Integer, //int
-        YesNo, //boolean
+
+        public void SetValue(bool value)
+        {
+            if (value)
+            {
+                this.Value = "yes";
+            }
+            else
+            {
+                this.Value = "no";
+            }
+        }
+
+        public void SetValue(int value)
+        {
+            this.Value = value.ToString();
+        }
+
+        public void SetValue(double value)
+        {
+            this.Value = value.ToString();
+        }
     }
 }

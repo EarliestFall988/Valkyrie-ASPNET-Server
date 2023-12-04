@@ -25,10 +25,10 @@ namespace Avalon
             //     StateMachineVariableType.Integer // guess
             // };
 
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
+            ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "name", new ReferenceTuple(StateMachineVariableType.Text, false) },
-                { "guess", new ReferenceTuple(StateMachineVariableType.Integer, false) }
+                { "name", new Parameter(StateMachineVariableType.Text) },
+                { "guess", new Parameter(StateMachineVariableType.Integer) }
             };
 
             Name = "Guess";
@@ -36,8 +36,14 @@ namespace Avalon
             Function = () =>
             {
 
-                string name = Parameters["name"].GetText();
-                int guessNumber = Parameters["guess"].GetInt();
+                VariableDefinition<string>? nameVarCheck = Parameters["name"] as VariableDefinition<string>;
+                VariableDefinition<int>? guessNumberVarCheck = Parameters["guess"] as VariableDefinition<int>;
+
+                if (nameVarCheck == null || guessNumberVarCheck == null)
+                    return -1;
+
+                var name = nameVarCheck.Value;
+                var guessNumber = guessNumberVarCheck.Value;
 
                 Debug.WriteLine($"Okay {name}, Guess a number");
                 string? number = guessNumber.ToString(); // Console.ReadLine();
@@ -70,6 +76,7 @@ namespace Avalon
                     Debug.WriteLine("Incorrect. Try Again");
                     return 0;
                 }
+
             };
         }
     }

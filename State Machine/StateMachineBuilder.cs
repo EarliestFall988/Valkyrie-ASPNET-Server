@@ -18,7 +18,7 @@ namespace Avalon
         private Dictionary<string, FunctionDefinition> functions;
         private Dictionary<string, State> States;
         private Dictionary<string, Transition> Transitions;
-        private Dictionary<string, KeyTypeDefinition> Variables;
+        private Dictionary<string, IVariableType> Variables;
         private FunctionLibrary FunctionLibrary;
         StateMachine StateMachine;
 
@@ -36,7 +36,7 @@ namespace Avalon
             functions = new Dictionary<string, FunctionDefinition>();
             States = new Dictionary<string, State>();
             Transitions = new Dictionary<string, Transition>();
-            Variables = new Dictionary<string, KeyTypeDefinition>();
+            Variables = new Dictionary<string, IVariableType>();
         }
 
         public Func<int> GetDefaultFunction()
@@ -205,7 +205,7 @@ namespace Avalon
             }
         }
 
-        private void InjectParameters(FunctionDefinition function, Dictionary<string, KeyTypeDefinition> parameters, int lineNumber)
+        private void InjectParameters(FunctionDefinition function, Dictionary<string, IVariableType> parameters, int lineNumber)
         {
             if (parameters.Count > 0 && function != null)
             {
@@ -307,76 +307,32 @@ namespace Avalon
                     Debug.WriteLine($"adding variable {name} ({variableType}) = {value}.");
                 }
 
-                Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
 
-                // if (foundProperty && visibility == "ref") //handle for other objects to reference this variable
-                // {
-                //     switch (variableType)
-                //     {
-                //         case StateMachineVariableType.Text:
-                //             if (stringRefDict.ContainsKey(name))
-                //             {
-                //                 var str = stringRefDict[name];
-                //                 Variables.Add(name, new KeyTypeDefinition(name, variableType, str));
-                //             }
-                //             break;
-                //         case StateMachineVariableType.Single:
-                //             if (floatRefDict.ContainsKey(name))
-                //             {
-                //                 var flt = floatRefDict[name];
-                //                 Variables.Add(name, new KeyTypeDefinition(name, variableType, flt));
-                //             }
-                //             break;
-                //         case StateMachineVariableType.GameObject:
-                //             if (GameObjectRefDict.ContainsKey(name))
-                //             {
-                //                 var obj = GameObjectRefDict[name];
-                //                 Variables.Add(name, new KeyTypeDefinition(name, variableType, obj));
-                //             }
-                //             break;
-                //     }
-                // }
-                // else
-                // {
+                switch (variableType)
+                {
+                    case StateMachineVariableType.Text:
+                        Variables.Add(name, VariableDefinition<string>.CreateString(name, value));
+                        break;
+                    case StateMachineVariableType.Decimal:
+                        Variables.Add(name, VariableDefinition<decimal>.CreateDecimal(name, decimal.Parse(value)));
+                        break;
 
-                // if (!Variables.ContainsKey(name))
-                //     if (variableType != StateMachineVariableType.Single)
-                //         Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
-                //     else
-                //         Variables.Add(name, new KeyTypeDefinition(name, variableType, float.Parse(value)));
-                // }
+                    case StateMachineVariableType.Integer:
+                        Variables.Add(name, VariableDefinition<int>.CreateInt(name, int.Parse(value)));
+                        break;
 
-                // foreach (var t in GameObjectRefDict.Keys)
-                // {
-                //     if (Variables.ContainsKey(t)) continue;
+                    case StateMachineVariableType.YesNo:
+                        Variables.Add(name, VariableDefinition<bool>.CreateBool(name, bool.Parse(value)));
+                        break;
 
-                //     var obj = GameObjectRefDict[t];
-                //     Variables.Add(t, new KeyTypeDefinition(t, StateMachineVariableType.GameObject, obj)); // <- error here
-                // }
+                    default:
+                        Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
+                        break;
+                }
 
-                // foreach (var t in stringRefDict.Keys)
-                // {
-
-                //     if (Variables.ContainsKey(t)) continue;
-
-                //     var str = stringRefDict[t];
-                //     Variables.Add(t, new KeyTypeDefinition(t, StateMachineVariableType.Text, str));
-                // }
-
-                // foreach (var t in floatRefDict.Keys)
-                // {
-
-                //     if (Variables.ContainsKey(t)) continue;
-
-                //     var flt = floatRefDict[t];
-                //     Variables.Add(t, new KeyTypeDefinition(t, StateMachineVariableType.Single, flt));
-                // }
-
-
-
+                //Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
                 createdVariables = true;
             }
-
 
             foreach (var x in functionsJson.EnumerateArray())
             {
@@ -387,9 +343,9 @@ namespace Avalon
 
 
 
-                Dictionary<string, ReferenceTuple> parameterList = new Dictionary<string, ReferenceTuple>();
+                Dictionary<string, Parameter> parameterList = new Dictionary<string, Parameter>();
 
-                Dictionary<string, KeyTypeDefinition> injectionVariables = new Dictionary<string, KeyTypeDefinition>();
+                Dictionary<string, IVariableType> injectionVariables = new Dictionary<string, IVariableType>();
 
                 if (name == null)
                     throw new Exception($"Invalid function definition. A valid name must be given after the definition.");
@@ -465,7 +421,7 @@ namespace Avalon
                     if (!result)
                         throw new Exception($"Invalid function parameter definition. A valid type must be given after the name. ({paramName} : {paramType})");
 
-                    parameterList.Add(paramName, new ReferenceTuple(variableType, true));
+                    parameterList.Add(paramName, new Parameter(variableType, parameterInjectedSuccessfully: true));
 
                     if (!Variables.TryGetValue(varToConnectName, out var variable))
                         throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" does not exist. ({name} - {paramName} : {paramType})");
@@ -649,7 +605,7 @@ namespace Avalon
 
                 foreach (var y in x.ExpectedParameters)
                 {
-                    pmtrs += y.Key + ": " + y.Value.type + ", ";
+                    pmtrs += y.Key + ": " + y.Value.Type + ", ";
                 }
 
                 pmtrs = pmtrs.Trim().TrimEnd(',');
@@ -669,7 +625,7 @@ namespace Avalon
             Debug.WriteLine("\n\t>Program Loaded.\n");
 
 
-            foreach(var x in functions.Values)
+            foreach (var x in functions.Values)
             {
                 x.StateMachine = StateMachine;
             }
@@ -696,7 +652,7 @@ namespace Avalon
 
             var importFunctions = false;
             FunctionDefinition? currentFunction = null; // default function
-            Dictionary<string, KeyTypeDefinition> parameters = new Dictionary<string, KeyTypeDefinition>();
+            Dictionary<string, IVariableType> parameters = new Dictionary<string, IVariableType>();
             var hasImportedFunctions = false;
 
             var defineTransitions = false;
@@ -1097,7 +1053,7 @@ namespace Avalon
 
                 foreach (var y in x.ExpectedParameters)
                 {
-                    pmtrs += y.Key + ": " + y.Value.type + ", ";
+                    pmtrs += y.Key + ": " + y.Value.Type + ", ";
                 }
 
                 pmtrs = pmtrs.Trim().TrimEnd(',');

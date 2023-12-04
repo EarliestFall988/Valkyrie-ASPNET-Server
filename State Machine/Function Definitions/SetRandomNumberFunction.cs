@@ -6,43 +6,43 @@ using System.Threading.Tasks;
 
 namespace Avalon
 {
+    /// <summary>
+    /// Set a random number
+    /// </summary>
     public sealed class SetRandomNumberFunction : FunctionDefinition
     {
 
         public SetRandomNumberFunction()
         {
+            Setup();
             DefineFunction();
+        }
+
+        void Setup()
+        {
+            Name = "SetRandomNumber";
+            Description = "Set a random number within the range of min and max";
+
+            ExpectedParameters = new Dictionary<string, Parameter>()
+            {
+                { "valueToChange", new Parameter(StateMachineVariableType.Integer) },
+                { "min", new Parameter(StateMachineVariableType.Integer) },
+                { "max", new Parameter(StateMachineVariableType.Integer) }
+            };
         }
 
         protected override void DefineFunction()
         {
 
-            Name = "SetRandomNumber";
-
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
-            {
-                { "valueToChange", new ReferenceTuple(StateMachineVariableType.Integer, false) },
-                { "min", new ReferenceTuple(StateMachineVariableType.Integer, false) },
-                { "max", new ReferenceTuple(StateMachineVariableType.Integer, false) }
-            };
-
             Func<int> func = () =>
             {
-                int valueToChange = Parameters["valueToChange"].GetInt();
-
-                int min = Parameters["min"].GetInt();
-
-                int max = Parameters["max"].GetInt();
 
                 Random random = new Random();
+                int randomNumber = random.Next(Get<int>("min"), Get<int>("max"));
+                bool result = TrySet("valueToChange", randomNumber);
 
-                int randomNumber = random.Next(min, max);
 
-                // Console.WriteLine($"The random number is {randomNumber}");
-
-                Parameters["valueToChange"].SetValue(randomNumber.ToString());
-
-                return 1;
+                return result == true ? 1 : -1;
             };
 
             Function = func;

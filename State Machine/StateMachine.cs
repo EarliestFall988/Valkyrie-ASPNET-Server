@@ -21,7 +21,7 @@ namespace Avalon
         /// <returns></returns>
         public List<State> States = new List<State>();
 
-        public Dictionary<string, KeyTypeDefinition> Variables = new Dictionary<string, KeyTypeDefinition>();
+        public Dictionary<string, IVariableType> Variables = new Dictionary<string, IVariableType>();
 
         /// <summary>
         /// The current state of the machine.

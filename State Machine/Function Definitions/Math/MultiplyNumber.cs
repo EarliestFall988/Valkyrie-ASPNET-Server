@@ -16,11 +16,11 @@ namespace Avalon
 
         void Setup()
         {
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
+            ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "a", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "b", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "out", new ReferenceTuple(StateMachineVariableType.Decimal, false, VariableIO.Out) }
+                { "a", new Parameter(StateMachineVariableType.Decimal) },
+                { "b", new Parameter(StateMachineVariableType.Decimal) },
+                { "out", new Parameter(StateMachineVariableType.Decimal, VariableIO.Out) }
             };
         }
 
@@ -29,14 +29,24 @@ namespace Avalon
             Name = nameof(MultiplyNumber);
             Function = () =>
             {
-                var a = Parameters["a"].GetDecimal();
-                var b = Parameters["b"].GetDecimal();
+                var x = Parameters["a"];
+                var y = Parameters["b"];
 
-                Debug.WriteLine($"{a} * {b} = {a * b}");
+                var z = Parameters["out"];
 
-                Parameters["out"].SetValue(a * b);
+                if (x is VariableDefinition<decimal> aV && y is VariableDefinition<decimal> bV && z is VariableDefinition<decimal> resultV)
+                {
+                    var b = bV.Value;
+                    var a = aV.Value;
 
-                return 1;
+                    Debug.WriteLine($"{a} * {b} = {a * b}");
+
+                    resultV.Value = a * b;
+
+                    return 1;
+                }
+
+                return -1;
             };
         }
     }

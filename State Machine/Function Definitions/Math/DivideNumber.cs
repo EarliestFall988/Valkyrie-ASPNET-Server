@@ -17,11 +17,11 @@ namespace Avalon
 
         void Setup()
         {
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
+            ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "a", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "b", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "out", new ReferenceTuple(StateMachineVariableType.Decimal, false, VariableIO.Out) }
+                { "a", new Parameter(StateMachineVariableType.Decimal) },
+                { "b", new Parameter(StateMachineVariableType.Decimal) },
+                { "out", new Parameter(StateMachineVariableType.Decimal, VariableIO.Out) }
             };
         }
 
@@ -30,20 +30,30 @@ namespace Avalon
             Name = nameof(DivideNumber);
             Function = () =>
             {
-                var a = Parameters["a"].GetDecimal();
-                var b = Parameters["b"].GetDecimal();
+                var x = Parameters["a"];
+                var y = Parameters["b"];
 
-                if (b == 0)
+                var z = Parameters["out"];
+
+                if (x is VariableDefinition<decimal> aV && y is VariableDefinition<decimal> bV && z is VariableDefinition<decimal> resultV)
                 {
-                    Debug.WriteLine("Cannot divide by zero");
-                    return -1;
+                    var b = bV.Value;
+                    var a = aV.Value;
+
+                    if (b == 0)
+                    {
+                        Debug.WriteLine("Cannot divide by zero");
+                        return -1;
+                    }
+
+                    Debug.WriteLine($"{a} / {b} = {a / b}");
+
+                    resultV.Value = a / b;
+
+                    return 1;
                 }
 
-                Debug.WriteLine($"{a} / {b} = {a / b}");
-
-                Parameters["out"].SetValue(a / b);
-
-                return 1;
+                return -1;
             };
         }
 

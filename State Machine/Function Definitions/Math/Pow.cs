@@ -16,11 +16,11 @@ namespace Avalon
 
         void Setup()
         {
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
+            ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "a", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "b", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "out", new ReferenceTuple(StateMachineVariableType.Decimal, false, VariableIO.Out) }
+                { "a", new Parameter(StateMachineVariableType.Decimal) },
+                { "b", new Parameter(StateMachineVariableType.Decimal) },
+                { "out", new Parameter(StateMachineVariableType.Decimal, VariableIO.Out) }
             };
         }
 
@@ -29,16 +29,27 @@ namespace Avalon
             Name = nameof(PowNumber);
             Function = () =>
             {
-                var a = Parameters["a"].GetDecimal();
-                var b = Parameters["b"].GetDecimal();
+                var x = Parameters["a"];
+                var y = Parameters["b"];
 
-                var pow = Math.Pow((double)a, (double)b);
+                var z = Parameters["out"];
 
-                Debug.WriteLine($"{a} to the power of {b} = {pow}");
+                if (x is VariableDefinition<decimal> aV && y is VariableDefinition<decimal> bV && z is VariableDefinition<decimal> resultV)
+                {
 
-                Parameters["out"].SetValue((decimal)pow);
+                    var b = bV.Value;
+                    var a = aV.Value;
 
-                return 1;
+                    var powResult = Math.Pow((double)a, (double)b);
+
+                    Debug.WriteLine($"{a} to the power of {b} = {powResult}");
+
+                    resultV.Value = (decimal)powResult;
+                    return 1;
+                }
+
+                return -1;
+
             };
         }
     }

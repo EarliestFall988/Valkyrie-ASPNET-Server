@@ -13,11 +13,11 @@ namespace Avalon
 
         void Setup()
         {
-            ExpectedParameters = new Dictionary<string, ReferenceTuple>()
+            ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "a", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "b", new ReferenceTuple(StateMachineVariableType.Decimal, false) },
-                { "out", new ReferenceTuple(StateMachineVariableType.Decimal, false, VariableIO.Out) }
+                { "a", new Parameter(StateMachineVariableType.Decimal) },
+                { "b", new Parameter(StateMachineVariableType.Decimal) },
+                { "out", new Parameter(StateMachineVariableType.Decimal, VariableIO.Out) }
             };
         }
 
@@ -26,14 +26,22 @@ namespace Avalon
             Name = nameof(AddNumber);
             Function = () =>
             {
-                var a = Parameters["a"].GetDecimal();
-                var b = Parameters["b"].GetDecimal();
+                var x = Parameters["a"];
+                var y = Parameters["b"];
 
-                Debug.WriteLine($"{a} + {b} = {a + b}");
+                var z = Parameters["out"];
 
-                Parameters["out"].SetValue(a + b);
+                if (x is VariableDefinition<decimal> a && y is VariableDefinition<decimal> b && z is VariableDefinition<decimal> result)
+                {
 
-                return 1;
+                    Debug.WriteLine($"{a} + {b} = {a.Value + b.Value}");
+
+                    result.Value = a.Value + b.Value;
+
+                    return 1;
+                }
+
+                return -1;
             };
         }
 
