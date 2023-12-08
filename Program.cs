@@ -1,4 +1,4 @@
-﻿using Avalon;
+﻿using ValkyrieFSMCore;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text.Json;
 
 using Valkyrie_Server;
+using ValkyrieFSMCore.WM;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +17,10 @@ var env = new ConfigurationBuilder()
 
 string linkURI = env["VALK_DASHBOARD_LINK"];
 
+string version = env["VERSION"];
+
 var splash = "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <title>It Works!!</title>\r\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\r\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\">\r\n</head>\r\n<script>\r\n\r\n    getURI = () => {\r\n        document.getElementById(\"link-to-paste\").innerHTML = window.location.href + \"api/v1/sync\";\r\n    }\r\n\r\n</script>\r\n<style>\r\n    .body {\r\n        background-color: #171717;\r\n        width: 90vw;\r\n        height: 90vh;\r\n        color: #ffffff;\r\n        padding: 3rem;\r\n        font-family: 'Roboto', sans-serif;\r\n        display: block;\r\n        box-sizing: border-box;\r\n    }\r\n\r\n    h1 {\r\n        font-size: 3rem;\r\n    }\r\n\r\n    h1, h2 {\r\n        user-select: none;\r\n    }\r\n\r\n    h2 {\r\n        font-size: 1.5rem;\r\n        font-weight: 200;\r\n    }\r\n\r\n    p {\r\n        font-size: 1.25rem;\r\n    }\r\n\r\n    a {\r\n        font-size: 1.25rem;\r\n        color: #ffff;\r\n        text-decoration: none;\r\n        background-color: #1d4ed8;\r\n        padding: 0.25rem;\r\n        border-radius: 0.25rem;\r\n    }\r\n\r\n    .sync-link {\r\n        color: lightblue;\r\n        text-decoration: underline;\r\n        text-underline-offset: 0.25rem;\r\n        font-size: 1.5rem;\r\n    }\r\n\r\n    .no-select {\r\n        user-select: none;\r\n    }\r\n</style>\r\n<body onload=\"getURI()\" class=\"body\">\r\n " +
-    $"<h1>It Works!🎉🎉</h1>\r\n    <h2>Copy the link below and paste it back in the Valkyrie Connection Page</h2>\r\n    <p> <span class=\"no-select\">👉 </span><span id=\"link-to-paste\" class=\"sync-link\"></span></p>\r\n    <p class=\"no-select\"><a href=\"{linkURI ?? "https://google.com"}\"> Go To Dashboard </a></p>\r\n</body>\r\n</html>\r\n";
+    $"<h1>It Works!🎉🎉</h1>\r\n    <h2>Copy the link below and paste it back in the Valkyrie Connection Page</h2>\r\n    <p> <span class=\"no-select\">👉 </span><span id=\"link-to-paste\" class=\"sync-link\"></span></p>\r\n    <p class=\"no-select\"><a href=\"{linkURI ?? "https://google.com"}\"> Go To Dashboard </a></p> <p class=\"no-select\">v{version}</p>\r\n</body>\r\n</html>\r\n";
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +30,32 @@ var app = builder.Build();
 
 var apiKey = env["API_KEY"];
 var valkApiKey = "some key";
+
+var projectTest = new GetProjects();
+projectTest.Parameters.Add("out", VariableDefinition<List<Project>>.CreateCustom("out", "projects", new()));
+var result = projectTest.Function();
+
+Debug.WriteLine("projects ");
+foreach (var x in projectTest.Get<List<Project>>("out"))
+{
+    Debug.WriteLine(x.Name);
+}
+
+Debug.WriteLine("\n\n\n\n");
+
+var project = projectTest.Get<List<Project>>("out")[0];
+
+var split = new SplitProject();
+split.Parameters.Add("project", new VariableDefinition<Project>("project", project, "project"));
+split.Parameters.Add("name", VariableDefinition<string>.CreateString("name", ""));
+split.Parameters.Add("id", VariableDefinition<string>.CreateString("id", ""));
+
+
+var splitResult = split.Function();
+
+Debug.WriteLine("split result: " + splitResult);
+
+Debug.WriteLine("name: " + split.Get<string>("name"));
 
 
 long minuteCountWaitTime = 5;
@@ -82,7 +111,7 @@ app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
     }
 
     Debug.WriteLine("test 1");
-    
+
     ValkyrieServerController valkyrieServerController = new ValkyrieServerController()
     {
         ValkyrieAPIKey = valkApiKey
@@ -91,8 +120,8 @@ app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
 
     Debug.WriteLine("test 2");
 
-    var res = await valkyrieServerController.UpdateInstructionFunctionDefinitions(instructionId);
 
+    var res = await valkyrieServerController.UpdateInstructionFunctionDefinitions(instructionId);
     if (res.statusCode.ToLower() == "ok")
     {
         ctx.Response.StatusCode = 200;

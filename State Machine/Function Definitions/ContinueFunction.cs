@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     public sealed class ContinueFunction : FunctionDefinition
     {

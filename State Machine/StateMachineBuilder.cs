@@ -8,19 +8,22 @@ using System.Text.Json;
 using System.Linq;
 using System.Diagnostics;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The State Machine Constructor handles the parsing of the program file and the creation of the state machine.
     /// </summary>
     public class StateMachineBuilder
     {
-        private Dictionary<string, FunctionDefinition> functions;
-        private Dictionary<string, State> States;
-        private Dictionary<string, Transition> Transitions;
-        private Dictionary<string, IVariableType> Variables;
-        private FunctionLibrary FunctionLibrary;
-        StateMachine StateMachine;
+        private Dictionary<string, FunctionDefinition> _functions { get; set; }
+        private Dictionary<string, State> _states { get; set; }
+        private Dictionary<string, Transition> _transitions { get; set; }
+        private Dictionary<string, IVariableSignature> _variables { get; set; }
+
+        private FunctionLibrary _functionLibrary { get; set; }
+        private StateMachine _stateMachine { get; set; }
+
+        private VariableFactory _factory { get; set; } = new();
 
         // public Dictionary<string, GameObject> GameObjectRefDict = new Dictionary<string, GameObject>();
         public Dictionary<string, string> stringRefDict = new Dictionary<string, string>();
@@ -31,12 +34,12 @@ namespace Avalon
         public StateMachineBuilder()
         {
 
-            StateMachine = new StateMachine();
-            FunctionLibrary = new FunctionLibrary();
-            functions = new Dictionary<string, FunctionDefinition>();
-            States = new Dictionary<string, State>();
-            Transitions = new Dictionary<string, Transition>();
-            Variables = new Dictionary<string, IVariableType>();
+            _stateMachine = new StateMachine();
+            _functionLibrary = new FunctionLibrary();
+            _functions = new Dictionary<string, FunctionDefinition>();
+            _states = new Dictionary<string, State>();
+            _transitions = new Dictionary<string, Transition>();
+            _variables = new Dictionary<string, IVariableSignature>();
         }
 
         public Func<int> GetDefaultFunction()
@@ -54,7 +57,7 @@ namespace Avalon
             var stateJob = GetDefaultFunction();
 
             if (trimmedJobName != string.Empty)
-                stateJob = functions[trimmedJobName].Function;
+                stateJob = _functions[trimmedJobName].Function;
 
             AddState(new State(trimmedName, stateJob));
             if (trimmedJobName != null && trimmedJobName != string.Empty)
@@ -65,7 +68,7 @@ namespace Avalon
 
         public void AddState(State state)
         {
-            States.Add(state.Name, state);
+            _states.Add(state.Name, state);
 
         }
 
@@ -75,7 +78,7 @@ namespace Avalon
             string trimmedName = name.Trim();
             string trimmedJobName = jobName.Trim();
 
-            var stateJob = functions[trimmedJobName];
+            var stateJob = _functions[trimmedJobName];
 
             State state = new State(trimmedName, stateJob.Function);
 
@@ -95,7 +98,7 @@ namespace Avalon
             var stateJob = GetDefaultFunction();
 
             if (trimmedJobName != string.Empty)
-                stateJob = functions[trimmedJobName].Function;
+                stateJob = _functions[trimmedJobName].Function;
 
             // States.Add(name, new State(name, stateJob));
             var state = new State(trimmedName, stateJob);
@@ -126,16 +129,16 @@ namespace Avalon
 
             Debug.WriteLine(trimmedName);
 
-            Transition t = new Transition(States[trimmedFrom], States[trimmedTo], trimmedName, outcome);
+            Transition t = new Transition(_states[trimmedFrom], _states[trimmedTo], trimmedName, outcome);
 
-            Transitions.Add(trimmedName, t);
+            _transitions.Add(trimmedName, t);
 
 
-            if (States[trimmedFrom].FallbackState)
+            if (_states[trimmedFrom].FallbackState)
             {
                 if (machine.FallbackState != null)
                 {
-                    machine.FallbackState.Transitions.Add(Transitions[trimmedName]);
+                    machine.FallbackState.Transitions.Add(_transitions[trimmedName]);
                     // Debug.WriteLine("Added fallback state transition.");
                 }
                 else
@@ -144,11 +147,11 @@ namespace Avalon
                 }
             }
 
-            if (States[trimmedFrom].InitialState)
+            if (_states[trimmedFrom].InitialState)
             {
                 if (machine.InitialState != null)
                 {
-                    machine.InitialState.Transitions.Add(Transitions[trimmedName]);
+                    machine.InitialState.Transitions.Add(_transitions[trimmedName]);
                     // Debug.WriteLine("Added initial state transition");
                 }
                 else
@@ -157,9 +160,9 @@ namespace Avalon
                 }
             }
 
-            if (!States[trimmedFrom].InitialState && !States[trimmedFrom].FallbackState)
+            if (!_states[trimmedFrom].InitialState && !_states[trimmedFrom].FallbackState)
             {
-                States[trimmedFrom].Transitions.Add(t);
+                _states[trimmedFrom].Transitions.Add(t);
             }
 
             Debug.WriteLine("adding transition " + trimmedName + " (" + trimmedFrom + " -> " + trimmedTo + " && " + outcome + ")");
@@ -205,7 +208,7 @@ namespace Avalon
             }
         }
 
-        private void InjectParameters(FunctionDefinition function, Dictionary<string, IVariableType> parameters, int lineNumber)
+        private void InjectParameters(FunctionDefinition function, Dictionary<string, IVariableSignature> parameters, int lineNumber)
         {
             if (parameters.Count > 0 && function != null)
             {
@@ -257,24 +260,21 @@ namespace Avalon
                 var value = x.GetProperty("value").GetString();
 
 
-                // #region unity specific
-                // var extResult = ParseExtraneousVariables(name);
-
-                // if (extResult.type != "")
-                // {
-                //     name = extResult.name;
-                //     type = extResult.type;
-                // }
-
-                // if (type == "decimal")
-                // {
-                //     type = "float";
-                // }
-                // #endregion
-
                 var foundProperty = x.TryGetProperty("visibility", out var refProp);
                 string? visibility = "";
                 if (foundProperty) visibility = refProp.GetString();
+
+
+                var foundIO = x.TryGetProperty("io", out var refIO);
+                string io = "";
+                if (foundIO) io = refIO.GetString() ?? "";
+
+                VariableIO ioResult = VariableIO.In;
+
+                if (io.Trim().ToLower() == "output" || io.Trim().ToLower() == "out")
+                {
+                    ioResult = VariableIO.Out;
+                }
 
                 // Debug.WriteLine($"adding variable {name} ({type}) =  {value}.");
 
@@ -284,10 +284,11 @@ namespace Avalon
                 if (value == null)
                     throw new Exception($"Invalid variable definition. A valid value must be given after the name. ({value})");
 
-                bool result = GetType(type, out var variableType);
+                bool result = _factory.ContainsType(type);
 
                 if (!result)
-                    throw new Exception($"Invalid variable definition. A valid type must be given after the name. ({type})");
+                    throw new Exception($"Invalid variable definition. A valid type must be given after the name. You probably need to register the variable" +
+                        $"in the variable factory so it can be properly created upon building the state machine. ({type})");
 
                 if (name == null)
                     throw new Exception($"Invalid variable definition. A valid name must be given after the definition.");
@@ -295,40 +296,53 @@ namespace Avalon
                 if (name == "")
                     throw new Exception($"Invalid variable definition. A valid name must be given after the definition.");
 
-                if (Variables.ContainsKey(name))
+                if (_variables.ContainsKey(name))
                     throw new Exception($"Invalid variable definition. The variable {name} already exists.");
 
-                if (variableType == StateMachineVariableType.Text)
+
+                if (_factory.TryConstructVariable(name, type, out IVariableSignature? variableConstructionResult, ioResult))
                 {
-                    Debug.WriteLine($"adding variable {name} ({variableType}) = \"{value}\".");
+                    if (variableConstructionResult != null)
+                        _variables.Add(name, variableConstructionResult);
+                    else
+                        Debug.WriteLine(GetType().Name + " : " + "variable construction result is null - you did this intentionally to yourself :)");
                 }
                 else
                 {
-                    Debug.WriteLine($"adding variable {name} ({variableType}) = {value}.");
+                    Debug.WriteLine(GetType().Name + " : " + "variable construction failed - you probably need to register the variable in the variable factory.");
                 }
 
+                //if (variableType == StateMachineVariableType.Text)
+                //{
+                //    Debug.WriteLine($"adding variable {name} ({variableType}) = \"{value}\".");
+                //}
+                //else
+                //{
+                //    Debug.WriteLine($"adding variable {name} ({variableType}) = {value}.");
+                //}
 
-                switch (variableType)
-                {
-                    case StateMachineVariableType.Text:
-                        Variables.Add(name, VariableDefinition<string>.CreateString(name, value));
-                        break;
-                    case StateMachineVariableType.Decimal:
-                        Variables.Add(name, VariableDefinition<decimal>.CreateDecimal(name, decimal.Parse(value)));
-                        break;
 
-                    case StateMachineVariableType.Integer:
-                        Variables.Add(name, VariableDefinition<int>.CreateInt(name, int.Parse(value)));
-                        break;
+                //switch (variableType)
+                //{
+                //    case StateMachineVariableType.Text:
+                //        _variables.Add(name, VariableDefinition<string>.CreateString(name, value));
+                //        break;
+                //    case StateMachineVariableType.Decimal:
+                //        _variables.Add(name, VariableDefinition<decimal>.CreateDecimal(name, decimal.Parse(value)));
+                //        break;
 
-                    case StateMachineVariableType.YesNo:
-                        Variables.Add(name, VariableDefinition<bool>.CreateBool(name, bool.Parse(value)));
-                        break;
+                //    case StateMachineVariableType.Integer:
+                //        _variables.Add(name, VariableDefinition<int>.CreateInt(name, int.Parse(value)));
+                //        break;
 
-                    default:
-                        Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
-                        break;
-                }
+                //    case StateMachineVariableType.YesNo:
+                //        _variables.Add(name, VariableDefinition<bool>.CreateBool(name, bool.Parse(value)));
+                //        break;
+
+                //    default:
+                //        _variables.Add(name, new KeyTypeDefinition(name, variableType.ToString(), value));
+                //        break;
+                //}
 
                 //Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
                 createdVariables = true;
@@ -345,12 +359,12 @@ namespace Avalon
 
                 Dictionary<string, Parameter> parameterList = new Dictionary<string, Parameter>();
 
-                Dictionary<string, IVariableType> injectionVariables = new Dictionary<string, IVariableType>();
+                Dictionary<string, IVariableSignature> injectionVariables = new Dictionary<string, IVariableSignature>();
 
                 if (name == null)
                     throw new Exception($"Invalid function definition. A valid name must be given after the definition.");
 
-                if (!FunctionLibrary.TryGetFunction(name, out var function))
+                if (!_functionLibrary.TryGetFunction(name, out var function))
                     throw new Exception($"Invalid function definition. The function {name} does not exist.");
 
                 if (function == null)
@@ -362,7 +376,7 @@ namespace Avalon
                     var paramType = y.GetProperty("type").GetString();
                     var varToConnectName = y.GetProperty("connectVar").ToString();
 
-                    var overrideType = "";
+                    //var overrideType = "";
 
                     if (paramName == null)
                     {
@@ -370,31 +384,31 @@ namespace Avalon
                     }
 
                     // #region unity specific
-                    var extResult = ParseExtraneousVariables(varToConnectName);
+                    //var extResult = ParseExtraneousVariables(varToConnectName);
 
 
-                    if (extResult.type != "")
-                    {
-                        varToConnectName = extResult.name;
-                    }
+                    //if (extResult.type != "")
+                    //{
+                    //    varToConnectName = extResult.name;
+                    //}
 
                     // if (paramType == "decimal")
                     // {
                     //     paramType = "float";
                     // }
 
-                    var extParamName = ParseExtraneousVariables(paramName);
+                    //var extParamName = ParseExtraneousVariables(paramName);
 
-                    if (extParamName.type != "")
-                    {
-                        paramName = extParamName.name;
-                        overrideType = extParamName.type;
-                    }
+                    //if (extParamName.type != "")
+                    //{
+                    //    paramName = extParamName.name;
+                    //    overrideType = extParamName.type;
+                    //}
 
-                    if (varToConnectName == "")
-                    {
-                        varToConnectName = extParamName.name;
-                    }
+                    //if (varToConnectName == "")
+                    //{
+                    //    varToConnectName = extParamName.name;
+                    //}
 
                     // #endregion
 
@@ -407,30 +421,24 @@ namespace Avalon
                     if (paramType == null)
                         throw new Exception($"Invalid function parameter definition. A valid type must be given after the name.");
 
-                    bool result = GetType(paramType, out var variableType);
 
-                    #region Unity specific
-
-                    if (overrideType != "")
-                    {
-                        result = GetType(overrideType, out variableType);
-                    }
-
-                    #endregion
+                    bool result = _factory.ContainsType(paramType);
 
                     if (!result)
-                        throw new Exception($"Invalid function parameter definition. A valid type must be given after the name. ({paramName} : {paramType})");
+                        throw new Exception($"Invalid variable definition. A valid type must be given after the name. You probably need to register the variable" +
+                            $"in the variable factory so it can be properly created upon building the state machine. ({paramName} : {paramType})");
 
-                    parameterList.Add(paramName, new Parameter(variableType, parameterInjectedSuccessfully: true));
 
-                    if (!Variables.TryGetValue(varToConnectName, out var variable))
+                    parameterList.Add(paramName, new Parameter(paramType, parameterInjectedSuccessfully: true));
+
+                    if (!_variables.TryGetValue(varToConnectName, out var variable))
                         throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" does not exist. ({name} - {paramName} : {paramType})");
 
                     if (variable == null)
                         throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" cannot be generated. ({name} - {paramName} : {paramType})");
 
-                    if (variable.Type != variableType)
-                        throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" is not of type {variableType}. ({name} - {paramName} : {paramType})");
+                    if (variable.Type != paramType)
+                        throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" is not of type {paramType}. ({name} - {paramName} : {paramType})");
 
                     injectionVariables.Add(paramName, variable);
                 }
@@ -442,16 +450,16 @@ namespace Avalon
                 if (!injectionResult)
                     throw new Exception($"{result2}");
 
-                if (functions.ContainsKey(name))
+                if (_functions.ContainsKey(name))
                     throw new Exception($"Invalid function definition. The function {name} already exists.");
 
-                functions.Add(name, function);
+                _functions.Add(name, function);
 
                 createdFunctions = true;
             }
 
 
-            foreach (var x in functions)
+            foreach (var x in _functions)
             {
                 Debug.WriteLine($"Function added {x.Key} {string.Join(',', x.Value.ExpectedParameters.Keys)} .");
             }
@@ -498,7 +506,7 @@ namespace Avalon
                     createdFallback = true;
                 }
 
-                if (States.ContainsKey(name))
+                if (_states.ContainsKey(name))
                     throw new Exception($"Invalid state definition. The state {name} already exists.");
 
                 var functionName = s.GetProperty("function").GetString();
@@ -509,11 +517,11 @@ namespace Avalon
 
                 if (isStart)
                 {
-                    AddStartState(name, functionName, StateMachine);
+                    AddStartState(name, functionName, _stateMachine);
                 }
                 else if (isFallback)
                 {
-                    AddFallBackState(name, functionName, StateMachine);
+                    AddFallBackState(name, functionName, _stateMachine);
                 }
                 else
                 {
@@ -524,7 +532,7 @@ namespace Avalon
             }
 
 
-            foreach (var x in States)
+            foreach (var x in _states)
             {
                 Debug.WriteLine($"State added {x.Key}.");
             }
@@ -546,7 +554,7 @@ namespace Avalon
                 if (name == null || name == "")
                     throw new Exception($"Invalid transition definition. A valid name must be given after the definition.");
 
-                AddTransition(name, from, to, outcome, StateMachine);
+                AddTransition(name, from, to, outcome, _stateMachine);
 
                 createdTransitions = true;
             }
@@ -562,7 +570,7 @@ namespace Avalon
                 //Debug.ResetColor();
             }
 
-            if (!createdFunctions || functions.Count < 1)
+            if (!createdFunctions || _functions.Count < 1)
             {
                 //Debug.BackgroundColor = DebugColor.Yellow;
                 Debug.WriteLine("No functions defined.");
@@ -598,7 +606,7 @@ namespace Avalon
             //Debug.ForegroundColor = DebugColor.Green;
             Debug.WriteLine("Imported Functions:");
             //Debug.ResetColor();
-            foreach (var x in functions.Values)
+            foreach (var x in _functions.Values)
             {
 
                 string pmtrs = "";
@@ -617,7 +625,7 @@ namespace Avalon
             Debug.WriteLine("\n\nDefined States:");
             //Debug.ResetColor();
 
-            foreach (var x in States.Values)
+            foreach (var x in _states.Values)
             {
                 Debug.WriteLine("|" + x.Name + " [" + String.Join(',', x.Transitions) + "]");
             }
@@ -625,16 +633,16 @@ namespace Avalon
             Debug.WriteLine("\n\t>Program Loaded.\n");
 
 
-            foreach (var x in functions.Values)
+            foreach (var x in _functions.Values)
             {
-                x.StateMachine = StateMachine;
+                x.StateMachine = _stateMachine;
             }
 
-            StateMachine.States.AddRange(States.Values);
-            StateMachine.Variables = Variables;
-            StateMachine.CurrentState = StateMachine.InitialState;
+            _stateMachine.States.AddRange(_states.Values);
+            _stateMachine.Variables = _variables;
+            _stateMachine.CurrentState = _stateMachine.InitialState;
 
-            return StateMachine;
+            return _stateMachine;
         }
 
         [Obsolete("This method is deprecated, use ParseInstructionsJSON instead.")]
@@ -652,7 +660,7 @@ namespace Avalon
 
             var importFunctions = false;
             FunctionDefinition? currentFunction = null; // default function
-            Dictionary<string, IVariableType> parameters = new Dictionary<string, IVariableType>();
+            Dictionary<string, IVariableSignature> parameters = new Dictionary<string, IVariableSignature>();
             var hasImportedFunctions = false;
 
             var defineTransitions = false;
@@ -817,7 +825,7 @@ namespace Avalon
                         throw new Exception($"Invalid variable definition. A valid name must be given after the definition. (at line {lineNumber})");
 
 
-                    if (Variables.ContainsKey(name))
+                    if (_variables.ContainsKey(name))
                         throw new Exception($"Invalid variable definition. The variable {name} already exists. (at line {lineNumber})");
 
                     if (variableType == StateMachineVariableType.Text)
@@ -829,7 +837,7 @@ namespace Avalon
                         Debug.WriteLine($"adding variable {name} ({variableType}) = {value}.");
                     }
 
-                    Variables.Add(name, new KeyTypeDefinition(name, variableType, value));
+                    _variables.Add(name, new KeyTypeDefinition(name, variableType.ToString(), value));
 
                     continue;
                 }
@@ -866,14 +874,14 @@ namespace Avalon
                             InjectParameters(currentFunction, parameters, lineNumber);
                         }
 
-                        if (!FunctionLibrary.TryGetFunction(functionName, out var function))
+                        if (!_functionLibrary.TryGetFunction(functionName, out var function))
                             throw new Exception($"Invalid function definition. The function {functionName} does not exist. (at line {lineNumber})");
 
                         if (function == null)
                             throw new Exception($"Invalid function definition. The function {functionName} does not exist. (at line {lineNumber})");
 
                         currentFunction = function;
-                        functions.Add(functionName, currentFunction);
+                        _functions.Add(functionName, currentFunction);
                         continue;
                     }
                     else
@@ -884,7 +892,7 @@ namespace Avalon
                         if (currentFunction == null)
                             throw new Exception($"Invalid function definition. The function {functionName} does not exist. (at line {lineNumber})");
 
-                        if (functions.ContainsKey(functionName))
+                        if (_functions.ContainsKey(functionName))
                             throw new Exception($"Invalid function definition. The function {functionName} already exists. (at line {lineNumber})");
 
                         string[] splitStr = x.Split("=");
@@ -905,14 +913,14 @@ namespace Avalon
                         if (variableName == null || variableName == "")
                             throw new Exception($"Invalid function parameter definition. A valid variable name must be given after the parameter insert name. (at line {lineNumber})");
 
-                        if (!Variables.ContainsKey(variableName))
+                        if (!_variables.ContainsKey(variableName))
                             throw new Exception($"Invalid function parameter definition. The variable {variableName} does not exist. (at line {lineNumber})");
 
-                        var variable = Variables[variableName];
+                        var variable = _variables[variableName];
 
                         currentFunction.TryGetVariableType(insertName, out var variableType);
 
-                        if (variable.Type != variableType)
+                        if (variable.Type != variableType.ToString())
                             throw new Exception($"Invalid function parameter definition. The variable {variableName} is not of type {variableType}. (at line {lineNumber})");
 
                         parameters.Add(insertName, variable);
@@ -955,9 +963,9 @@ namespace Avalon
                             throw new Exception($"Invalid fallback state definition. A valid name must be given after the definition. (at line {lineNumber})");
 
                         // AddState(stateName, stateFunctionName);
-                        AddStartState(stateName, stateFunctionName, StateMachine);
+                        AddStartState(stateName, stateFunctionName, _stateMachine);
 
-                        States[stateName].InitialState = true;
+                        _states[stateName].InitialState = true;
 
                         createdStart = true;
 
@@ -980,9 +988,9 @@ namespace Avalon
                         // Debug.WriteLine("creating fallback");
 
                         // AddState(stateName, stateFunctionName);
-                        AddFallBackState(stateName, stateFunctionName, StateMachine);
+                        AddFallBackState(stateName, stateFunctionName, _stateMachine);
 
-                        States[stateName].FallbackState = true;
+                        _states[stateName].FallbackState = true;
 
                         createdFallback = true;
 
@@ -1006,7 +1014,7 @@ namespace Avalon
                     var outcome = int.Parse(transition.Split(":")[1].Trim());
 
 
-                    AddTransition(name, fromState, toState, outcome, StateMachine);
+                    AddTransition(name, fromState, toState, outcome, _stateMachine);
 
                     continue;
                 }
@@ -1024,7 +1032,7 @@ namespace Avalon
                 //Debug.ResetColor();
             }
 
-            if (!hasImportedFunctions || functions.Count < 1)
+            if (!hasImportedFunctions || _functions.Count < 1)
             {
                 //Debug.BackgroundColor = DebugColor.Yellow;
                 Debug.WriteLine("No functions defined.");
@@ -1046,7 +1054,7 @@ namespace Avalon
             //Debug.ForegroundColor = DebugColor.Green;
             Debug.WriteLine("Imported Functions:");
             //Debug.ResetColor();
-            foreach (var x in functions.Values)
+            foreach (var x in _functions.Values)
             {
 
                 string pmtrs = "";
@@ -1065,16 +1073,16 @@ namespace Avalon
             Debug.WriteLine("\n\nDefined States:");
             //Debug.ResetColor();
 
-            foreach (var x in States.Values)
+            foreach (var x in _states.Values)
             {
                 Debug.WriteLine("|" + x.Name + " [" + String.Join(',', x.Transitions) + "]");
             }
 
             Debug.WriteLine("\n\t>Program Loaded.\n");
 
-            StateMachine.States.AddRange(States.Values);
+            _stateMachine.States.AddRange(_states.Values);
 
-            return StateMachine;
+            return _stateMachine;
         }
 
         /// <summary>

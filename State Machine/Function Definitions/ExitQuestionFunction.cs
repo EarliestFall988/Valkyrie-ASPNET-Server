@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     public sealed class ExitQuestionFunction : FunctionDefinition
     {

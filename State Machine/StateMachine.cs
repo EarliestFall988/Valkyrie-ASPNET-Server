@@ -1,7 +1,7 @@
 
 using System.Diagnostics;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The State Machine is the main class that handles the state machine.
@@ -21,7 +21,7 @@ namespace Avalon
         /// <returns></returns>
         public List<State> States = new List<State>();
 
-        public Dictionary<string, IVariableType> Variables = new Dictionary<string, IVariableType>();
+        public Dictionary<string, IVariableSignature> Variables = new Dictionary<string, IVariableSignature>();
 
         /// <summary>
         /// The current state of the machine.

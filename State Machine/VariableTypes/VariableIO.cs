@@ -1,4 +1,4 @@
-﻿namespace Avalon
+﻿namespace ValkyrieFSMCore
 {
     public enum VariableIO
     {

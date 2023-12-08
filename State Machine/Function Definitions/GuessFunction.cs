@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     public sealed class GuessFunction : FunctionDefinition
     {
@@ -27,8 +27,8 @@ namespace Avalon
 
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "name", new Parameter(StateMachineVariableType.Text) },
-                { "guess", new Parameter(StateMachineVariableType.Integer) }
+                { "name", new Parameter(StateMachineVariableType.Text.ToString()) },
+                { "guess", new Parameter(StateMachineVariableType.Integer.ToString()) }
             };
 
             Name = "Guess";

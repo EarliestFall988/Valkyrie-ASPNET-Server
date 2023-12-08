@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     public sealed class GreetUserFunction : FunctionDefinition
     {
@@ -23,7 +23,7 @@ namespace Avalon
 
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "name", new Parameter(StateMachineVariableType.Text) }
+                { "name", new Parameter(StateMachineVariableType.Text.ToString()) }
             };
 
             Func<int> GreetUser = () =>

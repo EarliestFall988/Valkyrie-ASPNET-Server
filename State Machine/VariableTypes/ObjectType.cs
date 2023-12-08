@@ -1,38 +1,41 @@
-﻿using Avalon;
+﻿using ValkyrieFSMCore;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// A class representing an object type.
     /// </summary>
-    public class ObjectType : IVariableType
+    public class ObjectType : IVariableSignature
     {
         /// <summary>
         /// The variables of the object.
         /// </summary>
-        Dictionary<string, IVariableType> _variables { get; set; } = new Dictionary<string, IVariableType>();
+        Dictionary<string, IVariableSignature> _variables { get; set; } = new Dictionary<string, IVariableSignature>();
 
         /// <summary>
         /// Enumerate through the variables.
         /// </summary>
-        public IEnumerable<IVariableType> Variables => _variables.Values;
+        public IEnumerable<IVariableSignature> Variables => _variables.Values;
 
-        public StateMachineVariableType Type { get; set; } = StateMachineVariableType.Object;
+        public string Type { get; set; } = StateMachineVariableType.Object.ToString();
 
         public VariableIO IO { get; set; }
 
         public string Key { get; set; }
 
-        public ObjectType(string key, StateMachineVariableType type, VariableIO objIo)
+        public string Description { get; set; }
+
+        public ObjectType(string key, string type, VariableIO objIo, string description)
         {
             Key = key;
             Type = type;
             IO = objIo;
+            Description = description;
         }
 
-        public bool TryGetItem<T>(string name, out T? res) where T : IVariableType
+        public bool TryGetItem<T>(string name, out T? res) where T : IVariableSignature
         {
-            if (_variables.TryGetValue(name, out IVariableType? item))
+            if (_variables.TryGetValue(name, out IVariableSignature? item))
             {
                 if (item is T)
                 {

@@ -5,8 +5,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
+using ValkyrieFSMCore.WM;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The Function Library is a collection of all functions that can be called by the state machine.
@@ -63,6 +64,18 @@ namespace Avalon
 
             #endregion
 
+
+            #region Project Functions
+
+            var eachProject = new EachProject();
+            var getProjects = new GetProjects();
+            var splitProject = new SplitProject();
+
+            ImportedFunctions.Add(eachProject.Name, eachProject);
+            ImportedFunctions.Add(getProjects.Name, getProjects);
+            ImportedFunctions.Add(splitProject.Name, getProjects);
+
+            #endregion
         }
 
         /// <summary>

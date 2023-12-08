@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// This is so I can fix the bug where I cannot pass pointers to the correct state function. Just google: value vs reference
     /// </summary>
-    public struct Parameter : IVariableType
+    public struct Parameter : IVariableSignature
     {
-        public StateMachineVariableType Type { get; set; }
+        /// <summary>
+        /// The type of variable
+        /// </summary>
+        public string Type { get; set; }
 
         /// <summary>
         /// Has the parameter been injected successfully?
@@ -30,7 +33,7 @@ namespace Avalon
         /// </summary>
         public string Description { get; set; } = "";
 
-        public Parameter(StateMachineVariableType type, VariableIO io = VariableIO.In, bool parameterInjectedSuccessfully = false, string description = "")
+        public Parameter(string type, VariableIO io = VariableIO.In, bool parameterInjectedSuccessfully = false, string description = "")
         {
             Type = type;
             this.InjectedSuccessfully = parameterInjectedSuccessfully;

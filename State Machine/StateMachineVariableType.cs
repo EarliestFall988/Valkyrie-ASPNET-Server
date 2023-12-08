@@ -1,4 +1,4 @@
-﻿namespace Avalon
+﻿namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The type of the key.
@@ -15,6 +15,8 @@
         ListInteger, //list of int
         ListYesNo, //list of boolean
 
-        Object //object
+        Object, //object
+
+        Custom //custom
     }
 }

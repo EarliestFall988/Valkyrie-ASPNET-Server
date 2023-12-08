@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The Transition is the class that handles the transition between states.

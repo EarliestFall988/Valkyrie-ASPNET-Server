@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The function metadata definition
@@ -61,7 +61,7 @@ namespace Avalon
         /// The dictionary of parameters
         /// </summary>
         /// <value></value>
-        protected Dictionary<string, IVariableType> Parameters { get; set; } = new Dictionary<string, IVariableType>();
+        public Dictionary<string, IVariableSignature> Parameters { get; set; } = new Dictionary<string, IVariableSignature>();
 
 
 
@@ -154,7 +154,7 @@ namespace Avalon
         /// <param name="parameters">the list of parameters</param>
         /// <param name="result">the result of the injection, outputs error messages</param>
         /// <returns></returns>
-        public bool TryInjectParameters(Dictionary<string, IVariableType> parameters, out string result)
+        public bool TryInjectParameters(Dictionary<string, IVariableSignature> parameters, out string result)
         {
             if (parameters.Count == ExpectedParameters.Count)
             {
@@ -203,7 +203,7 @@ namespace Avalon
 
         protected abstract void DefineFunction();
 
-        public bool TryGetVariableType(string name, out StateMachineVariableType result)
+        public bool TryGetVariableType(string name, out string result)
         {
             if (ExpectedParameters.ContainsKey(name))
             {
@@ -211,7 +211,7 @@ namespace Avalon
                 return true;
             }
 
-            result = StateMachineVariableType.Text;
+            result = StateMachineVariableType.Text.ToString();
             return false;
         }
     }
@@ -219,7 +219,7 @@ namespace Avalon
     /// <summary>
     /// A struct representing an expected parameter
     /// </summary>
-    public struct ExpectedParameter
+    public class ExpectedParameter
     {
         public string Name { get; init; }
         public string Type { get; init; }

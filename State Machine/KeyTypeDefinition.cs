@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The Key Type Definition handles the type of the key, name, and the value of the key.
     /// </summary>
-    public class KeyTypeDefinition : IVariableType
+    public class KeyTypeDefinition : IVariableSignature
     {
         /// <summary>
         /// The name of the key.
@@ -22,7 +22,7 @@ namespace Avalon
         /// The type of the key.
         /// </summary>
         /// <value></value>
-        public StateMachineVariableType Type { get; set; } = StateMachineVariableType.Text;
+        public string Type { get; set; } = StateMachineVariableType.Text.ToString();
 
         /// <summary>
         /// The value of the key.
@@ -36,16 +36,22 @@ namespace Avalon
         public VariableIO IO { get; set; } = VariableIO.In;
 
         /// <summary>
+        /// the description of the key type definition
+        /// </summary>
+        public string Description { get; set; } = "";
+
+        /// <summary>
         /// Default constructor.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="type"></param>
         /// <param name="value"></param>
-        public KeyTypeDefinition(string key, StateMachineVariableType type, string value)
+        public KeyTypeDefinition(string key, string type, string value, string description = "")
         {
             Key = key;
             Type = type;
             Value = value;
+            Description = description;
         }
 
         /// <summary>

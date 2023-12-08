@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// Divide Number Function Definition
@@ -19,9 +19,9 @@ namespace Avalon
         {
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "a", new Parameter(StateMachineVariableType.Decimal) },
-                { "b", new Parameter(StateMachineVariableType.Decimal) },
-                { "out", new Parameter(StateMachineVariableType.Decimal, VariableIO.Out) }
+                { "a", new Parameter(StateMachineVariableType.Decimal.ToString()) },
+                { "b", new Parameter(StateMachineVariableType.Decimal.ToString()) },
+                { "out", new Parameter(StateMachineVariableType.Decimal.ToString(), VariableIO.Out) }
             };
         }
 

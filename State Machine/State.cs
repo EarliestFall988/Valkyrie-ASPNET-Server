@@ -1,5 +1,5 @@
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// The State Machine is the main class that handles the state machine.

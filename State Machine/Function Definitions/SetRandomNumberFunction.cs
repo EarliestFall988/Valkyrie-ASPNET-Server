@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace Avalon
+namespace ValkyrieFSMCore
 {
     /// <summary>
     /// Set a random number
@@ -25,9 +25,9 @@ namespace Avalon
 
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "valueToChange", new Parameter(StateMachineVariableType.Integer) },
-                { "min", new Parameter(StateMachineVariableType.Integer) },
-                { "max", new Parameter(StateMachineVariableType.Integer) }
+                { "valueToChange", new Parameter(StateMachineVariableType.Integer.ToString()) },
+                { "min", new Parameter(StateMachineVariableType.Integer.ToString()) },
+                { "max", new Parameter(StateMachineVariableType.Integer.ToString()) }
             };
         }
 
