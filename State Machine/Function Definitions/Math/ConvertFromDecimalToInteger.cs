@@ -15,7 +15,7 @@ namespace Valkyrie_Server.State_Machine.Function_Definitions.Math
         {
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "decimal", new Parameter("decimal", VariableIO.In) }
+                { "decimal", new Parameter("decimal", VariableIO.In) },
                 { "integer", new Parameter("integer", VariableIO.Out) },
             };
         }

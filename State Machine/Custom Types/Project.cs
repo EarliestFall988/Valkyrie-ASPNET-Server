@@ -50,9 +50,9 @@ namespace ValkyrieFSMCore
         public float OtherCost { get; set; } = 0;
 
         [JsonPropertyName("state")]
-        public string State { get; set; } = 0;
+        public string State { get; set; } = "";
 
         [JsonPropertyName("status")]
-        public string Status { get; set; } = 0;
+        public string Status { get; set; } = "";
     }
 }
