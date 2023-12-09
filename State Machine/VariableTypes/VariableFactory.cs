@@ -27,9 +27,44 @@
         /// </summary>
         void Register()
         {
-            VariableConstructors.Add("projects", ("this variable maps to a list of projects", (key, io) =>
+            VariableConstructors.Add("projects", ("this type maps to a list of projects", (key, io) =>
             {
                 var x = VariableDefinition<List<Project>>.CreateCustom(key, "projects", new List<Project>(), io);
+                return x;
+            }
+            ));
+
+            VariableConstructors.Add("project", ("this is a project type", (key, io) =>
+            {
+                var x = VariableDefinition<Project>.CreateCustom(key, "project", new Project(), io);
+                return x;
+            }
+            ));
+
+            VariableConstructors.Add("string", ("this is a text type that can store words, special characters. and numbers (not the value of the number).", (key, io) =>
+            {
+                var x = VariableDefinition<string>.CreateCustom(key, "string", "", io);
+                return x;
+            }
+            ));
+
+            VariableConstructors.Add("decimal", ("the type represents decimal values (ex. 1.0, 2.34, -32.355 ...)", (key, io) =>
+            {
+                var x = VariableDefinition<float>.CreateCustom(key, "decimal", 0, io); // 👈 I know this is not an actual decimal type value. human readability is what I am after...
+                return x;
+            }
+            ));
+
+            VariableConstructors.Add("integer", ("this type represents whole number values (ex. 1, 5 ,-3 ...)", (key, io) =>
+            {
+                var x = VariableDefinition<int>.CreateCustom(key, "integer", 0, io);
+                return x;
+            }
+            ));
+
+            VariableConstructors.Add("boolean", ("this type is either true or false", (key, io) =>
+            {
+                var x = VariableDefinition<bool>.CreateCustom(key, "boolean", false, io);
                 return x;
             }
             ));
