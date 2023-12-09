@@ -5,6 +5,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
+using Valkyrie_Server.State_Machine.Function_Definitions;
+
 using ValkyrieFSMCore.WM;
 
 namespace ValkyrieFSMCore
@@ -76,6 +78,12 @@ namespace ValkyrieFSMCore
             ImportedFunctions.Add(splitProject.Name, splitProject);
 
             #endregion
+
+            var start = new StartFunction();
+            var end = new ExitFunction();
+
+            ImportedFunctions.Add(start.Name, start);
+            ImportedFunctions.Add(end.Name, end);
         }
 
         /// <summary>

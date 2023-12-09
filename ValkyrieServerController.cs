@@ -99,29 +99,37 @@ namespace Valkyrie_Server
             var functionJSON = GetSyncDataHandler.GetSyncData();
             Debug.WriteLine(functionJSON);
 
-            using HttpClient client = new();
-
-            HttpContent content = new StringContent(functionJSON);
-
-            client.DefaultRequestHeaders.Add("x-api-key", ValkyrieAPIKey);
-            client.DefaultRequestHeaders.Add("x-instruction-id", instructionId);
-            var response = await client.PostAsync(prodSyncFunctionsURITestBranch, content);
-
-            using StreamReader reader = new StreamReader(response.Content.ReadAsStream());
-
-            string responseString = await reader.ReadToEndAsync();
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                return ("Server Response Error: " + response.StatusCode + "\n" + responseString, false, response.StatusCode.ToString());
-            }
 
-            if (string.IsNullOrEmpty(responseString))
+                using HttpClient client = new();
+
+                HttpContent content = new StringContent(functionJSON);
+
+                client.DefaultRequestHeaders.Add("x-api-key", ValkyrieAPIKey);
+                client.DefaultRequestHeaders.Add("x-instruction-id", instructionId);
+                var response = await client.PostAsync(prodSyncFunctionsURITestBranch, content);
+
+                using StreamReader reader = new StreamReader(response.Content.ReadAsStream());
+
+                string responseString = await reader.ReadToEndAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ("Server Response Error: " + response.StatusCode + "\n" + responseString, false, response.StatusCode.ToString());
+                }
+
+                if (string.IsNullOrEmpty(responseString))
+                {
+                    return ("Error: Empty response from server", false, "0");
+                }
+
+                return (responseString, response.IsSuccessStatusCode, response.ReasonPhrase ?? "");
+            }
+            catch (Exception ex)
             {
-                return ("Error: Empty response from server", false, "0");
+                return (ex.Message, false, "0");
             }
-
-            return (responseString, response.IsSuccessStatusCode, response.ReasonPhrase ?? "");
         }
     }
 
