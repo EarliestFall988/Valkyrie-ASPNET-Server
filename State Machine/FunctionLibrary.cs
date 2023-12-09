@@ -79,11 +79,16 @@ namespace ValkyrieFSMCore
 
             #endregion
 
+
+            #region start and end functions (needed for the state machine to work)
+
             var start = new StartFunction();
             var end = new ExitFunction();
 
             ImportedFunctions.Add(start.Name, start);
             ImportedFunctions.Add(end.Name, end);
+
+            #endregion
         }
 
         /// <summary>

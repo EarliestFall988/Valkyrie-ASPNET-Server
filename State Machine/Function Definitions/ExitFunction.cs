@@ -7,6 +7,7 @@ namespace Valkyrie_Server.State_Machine.Function_Definitions
 
         public ExitFunction()
         {
+            Name = "Exit";
             DefineFunction();
         }
 
