@@ -68,6 +68,13 @@
                 return x;
             }
             ));
+
+            VariableConstructors.Add("any", ("this type can be anything", (key, io) =>
+            {
+                var x = VariableDefinition<object>.CreateCustom(key, "any", new object(), io);
+                return x;
+            }
+            ));
         }
 
         /// <summary>

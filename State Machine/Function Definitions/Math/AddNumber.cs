@@ -15,9 +15,9 @@ namespace ValkyrieFSMCore
         {
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "a", new Parameter(StateMachineVariableType.Decimal.ToString()) },
-                { "b", new Parameter(StateMachineVariableType.Decimal.ToString()) },
-                { "out", new Parameter(StateMachineVariableType.Decimal.ToString(), VariableIO.Out) }
+                { "a", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower()) },
+                { "b", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower()) },
+                { "out", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower(), VariableIO.Out) }
             };
         }
 

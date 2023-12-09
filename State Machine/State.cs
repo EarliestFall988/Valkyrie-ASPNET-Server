@@ -67,11 +67,11 @@ namespace ValkyrieFSMCore
         {
 
             // Console.WriteLine($"Evaluating Transitions for {Name} with outcome {outcome}");
-            // Console.WriteLine(Transitions.Count);
+            Console.WriteLine(Transitions.Count);
 
             foreach (var x in Transitions)
             {
-                // Console.WriteLine(x.Name);
+                Console.WriteLine(x.Name);
                 var result = x.EvaluateCondition(outcome);
                 if (result)
                 {

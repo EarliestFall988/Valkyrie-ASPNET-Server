@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -89,6 +89,39 @@ namespace ValkyrieFSMCore
             ImportedFunctions.Add(end.Name, end);
 
             #endregion
+
+
+
+            CheckFunctions(); // 👈 verifying that the functions are built correctly
+        }
+
+
+        void CheckFunctions()
+        {
+            foreach (var x in ImportedFunctions)
+            {
+
+                if (x.Key == null)
+                {
+                    throw new Exception("Function name is null");
+                }
+
+                if (x.Key != x.Value.Name)
+                {
+                    throw new Exception("Function name does not match key name");
+                }
+
+
+                if (x.Key.Length == 0)
+                {
+                    throw new Exception("Function name is empty");
+                }
+
+                if (x.Value.Function == null)
+                {
+                    throw new Exception("Function " + x.Key + " has no function defined");
+                }
+            }
         }
 
         /// <summary>

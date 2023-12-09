@@ -34,6 +34,7 @@ long minuteCountWaitTime = 5;
 StateMachinesController? stateMachinesController = new StateMachinesController(minuteCountWaitTime);
 
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -147,6 +148,8 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
         return response.content;
     }
 
+    Debug.WriteLine(response.content);
+
     string id = Guid.NewGuid().ToString();
 
     stateMachinesController.AddMachine(id, response.content);
@@ -193,7 +196,7 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
     if (status.complete)
     {
         context.Response.StatusCode = 200;
-        context.Response.Headers.Add("Content-Type", "application/json");
+        //context.Response.Headers.Add("Content-Type", "application/json");
         return status.result;
     }
     else

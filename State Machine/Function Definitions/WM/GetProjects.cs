@@ -12,10 +12,10 @@ namespace ValkyrieFSMCore.WM
     /// </summary>
     public class GetProjects : FunctionDefinition
     {
-        private static readonly string BASE_URL = "https://valkyrie-git-get-functions-from-server-earliestfall988.vercel.app/";
-        private static readonly string URI = "api/res/v1/projects";
 
-        private static readonly string url = "http://localhost:3000/api/rest/v1/projects";
+
+        private static readonly string url = "http://localhost:3001/api/rest/v1/projects";
+        private static readonly string devBranch = "https://warmanager-git-rest-api-earliestfall988.vercel.app/api/rest/v1/projects";
 
         public GetProjects()
         {
@@ -56,15 +56,15 @@ namespace ValkyrieFSMCore.WM
                     //client.DefaultRequestHeaders.Add("api_key", "fa3d5a36-f894-4af4-ae76-1b4ff70d9a19");
 
 
-                    string uri = BASE_URL + URI;
-                    Debug.WriteLine(uri);
 
-                    var response = client.PostAsync(url, content).Result;
+                    Debug.WriteLine(devBranch);
+
+                    var response = client.PostAsync(devBranch, content).Result;
 
 
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        Debug.WriteLine(response.StatusCode);
+                        Debug.WriteLine("err: " + response.StatusCode);
                         return -1;
                     }
 
@@ -84,7 +84,7 @@ namespace ValkyrieFSMCore.WM
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine("error: " + ex.Message);
                     return -1;
                 }
             };

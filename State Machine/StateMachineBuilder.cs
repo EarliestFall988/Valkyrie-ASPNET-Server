@@ -44,7 +44,7 @@ namespace ValkyrieFSMCore
 
         public Func<int> GetDefaultFunction()
         {
-            Func<int> Next = () => 0;
+            Func<int> Next = () => 1;
             return Next;
         }
 
@@ -507,7 +507,7 @@ namespace ValkyrieFSMCore
                 }
 
                 if (_states.ContainsKey(name))
-                    throw new Exception($"Invalid state definition. The state {name} already exists.");
+                    throw new Exception($"Invalid state definition. The state {name} already exists."); //TODO: should be dependant on ID not the name....
 
                 var functionName = s.GetProperty("function").GetString();
 
