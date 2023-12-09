@@ -59,6 +59,8 @@ app.MapGet("/", (HttpContext ctx) =>
 app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
 {
 
+    Debug.WriteLine("test 0");
+
     string instructionId = ctx.Request.Headers["id"];
     string key = ctx.Request.Headers["apikey"];
 
