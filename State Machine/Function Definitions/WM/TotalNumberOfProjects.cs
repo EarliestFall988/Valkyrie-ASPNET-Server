@@ -9,6 +9,7 @@
         public TotalNumberOfProjects()
         {
             Name = nameof(TotalNumberOfProjects);
+            Setup();
             DefineFunction();
         }
 

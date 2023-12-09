@@ -79,7 +79,7 @@ namespace ValkyrieFSMCore.WM
                     if (projects == null)
                         projects = new ProjectsListResult();
 
-                    Set("out", projects.projects);
+                    Set("result", projects.projects);
                     return 1;
                 }
                 catch (Exception ex)

@@ -6,12 +6,13 @@ namespace ValkyrieFSMCore
         public ConvertFromIntegerToDecimal()
         {
             Name = nameof(ConvertFromIntegerToDecimal);
-            Description = "Convert an integer type variable to decimal type variable";
+            Setup();
             DefineFunction();
         }
 
         void Setup()
         {
+            Description = "Convert an integer type variable to decimal type variable";
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
                 { "integer", new Parameter("integer", VariableIO.In) },

@@ -7,11 +7,13 @@ namespace Valkyrie_Server.State_Machine.Function_Definitions
         public Respond()
         {
             Name = nameof(Respond);
+            Setup();
             DefineFunction();
         }
 
         void Setup()
         {
+            Description = "Responds with the data provided and terminates the process.";
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
                 { "data", new Parameter("any") }

@@ -7,12 +7,13 @@ namespace Valkyrie_Server.State_Machine.Function_Definitions.Math
         public ConvertFromDecimalToInteger()
         {
             Name = nameof(ConvertFromDecimalToInteger);
-            Description = "Convert a decimal type variable to integer type variable. Rounds up if the value is 0.5 or greater.";
+            Setup();
             DefineFunction();
         }
 
         void Setup()
         {
+            Description = "Convert a decimal type variable to integer type variable. Rounds up if the value is 0.5 or greater.";
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
                 { "decimal", new Parameter("decimal", VariableIO.In) },
