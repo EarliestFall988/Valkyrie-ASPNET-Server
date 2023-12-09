@@ -7,6 +7,9 @@ using System.Text.Json;
 
 namespace ValkyrieFSMCore.WM
 {
+    /// <summary>
+    /// Get the list of projects function
+    /// </summary>
     public class GetProjects : FunctionDefinition
     {
         private static readonly string BASE_URL = "https://valkyrie-git-get-functions-from-server-earliestfall988.vercel.app/";
@@ -25,7 +28,7 @@ namespace ValkyrieFSMCore.WM
             Name = "GetProjects";
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "out", new Parameter("Projects", VariableIO.Out) }
+                { "result", new Parameter("projects", VariableIO.Out) }
             };
         }
 
@@ -70,8 +73,6 @@ namespace ValkyrieFSMCore.WM
                     var json = reader.ReadToEndAsync().Result;
 
                     Debug.WriteLine(json);
-
-
 
                     var projects = JsonSerializer.Deserialize<ProjectsListResult>(json);
 

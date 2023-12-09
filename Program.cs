@@ -16,7 +16,6 @@ var env = new ConfigurationBuilder()
     .Build();
 
 string linkURI = env["VALK_DASHBOARD_LINK"];
-
 string version = env["VERSION"];
 
 var splash = "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <title>It Works!!</title>\r\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\r\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\r\n    <link href=\"https://fonts.googleapis.com/css2?family=Roboto&display=swap\" rel=\"stylesheet\">\r\n</head>\r\n<script>\r\n\r\n    getURI = () => {\r\n        document.getElementById(\"link-to-paste\").innerHTML = window.location.href + \"api/v1/sync\";\r\n    }\r\n\r\n</script>\r\n<style>\r\n    .body {\r\n        background-color: #171717;\r\n        width: 90vw;\r\n        height: 90vh;\r\n        color: #ffffff;\r\n        padding: 3rem;\r\n        font-family: 'Roboto', sans-serif;\r\n        display: block;\r\n        box-sizing: border-box;\r\n    }\r\n\r\n    h1 {\r\n        font-size: 3rem;\r\n    }\r\n\r\n    h1, h2 {\r\n        user-select: none;\r\n    }\r\n\r\n    h2 {\r\n        font-size: 1.5rem;\r\n        font-weight: 200;\r\n    }\r\n\r\n    p {\r\n        font-size: 1.25rem;\r\n    }\r\n\r\n    a {\r\n        font-size: 1.25rem;\r\n        color: #ffff;\r\n        text-decoration: none;\r\n        background-color: #1d4ed8;\r\n        padding: 0.25rem;\r\n        border-radius: 0.25rem;\r\n    }\r\n\r\n    .sync-link {\r\n        color: lightblue;\r\n        text-decoration: underline;\r\n        text-underline-offset: 0.25rem;\r\n        font-size: 1.5rem;\r\n    }\r\n\r\n    .no-select {\r\n        user-select: none;\r\n    }\r\n</style>\r\n<body onload=\"getURI()\" class=\"body\">\r\n " +
@@ -30,33 +29,6 @@ var app = builder.Build();
 
 var apiKey = env["API_KEY"];
 var valkApiKey = "some key";
-
-var projectTest = new GetProjects();
-projectTest.Parameters.Add("out", VariableDefinition<List<Project>>.CreateCustom("out", "projects", new()));
-var result = projectTest.Function();
-
-Debug.WriteLine("projects ");
-foreach (var x in projectTest.Get<List<Project>>("out"))
-{
-    Debug.WriteLine(x.Name);
-}
-
-Debug.WriteLine("\n\n\n\n");
-
-var project = projectTest.Get<List<Project>>("out")[0];
-
-var split = new SplitProject();
-split.Parameters.Add("project", new VariableDefinition<Project>("project", project, "project"));
-split.Parameters.Add("name", VariableDefinition<string>.CreateString("name", ""));
-split.Parameters.Add("id", VariableDefinition<string>.CreateString("id", ""));
-
-
-var splitResult = split.Function();
-
-Debug.WriteLine("split result: " + splitResult);
-
-Debug.WriteLine("name: " + split.Get<string>("name"));
-
 
 long minuteCountWaitTime = 5;
 StateMachinesController? stateMachinesController = new StateMachinesController(minuteCountWaitTime);
@@ -230,36 +202,36 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
 });
 
 
-app.MapGet("/api/v1/functions", (HttpContext context) =>
-{
+//app.MapGet("/api/v1/functions", (HttpContext context) =>
+//{
 
-    string key = context.Request.Headers["apikey"];
+//    string key = context.Request.Headers["apikey"];
 
-    if (key == null)
-    {
-        context.Response.StatusCode = 401;
-        return "No API key provided";
-    }
+//    if (key == null)
+//    {
+//        context.Response.StatusCode = 401;
+//        return "No API key provided";
+//    }
 
-    if (apiKey != key)
-    {
-        context.Response.StatusCode = 401;
-        return "incorrect api key";
-    }
+//    if (apiKey != key)
+//    {
+//        context.Response.StatusCode = 401;
+//        return "incorrect api key";
+//    }
 
 
-    try
-    {
-        context.Response.Headers.Add("Content-Type", "application/json");
-        context.Response.StatusCode = 200;
-        return DiscoverFunctionsHandler.GetFunctionDefinitionsJSON();
-    }
-    catch (Exception e)
-    {
-        context.Response.StatusCode = 500;
-        return e.Message;
-    }
-});
+//    try
+//    {
+//        context.Response.Headers.Add("Content-Type", "application/json");
+//        context.Response.StatusCode = 200;
+//        return GetSyncDataHandler.GetFunctionDefinitions();
+//    }
+//    catch (Exception e)
+//    {
+//        context.Response.StatusCode = 500;
+//        return e.Message;
+//    }
+//});
 
 app.Run();
 
@@ -270,7 +242,7 @@ app.Run();
 /// <param name="Name">The name of the function</param>
 /// <param name="Description">The description of the function</param>
 /// <param name="Parameters">the parameters of the function</param>
-internal record FunctionListItem(string Name, string Description, ExpectedParameter[] Parameters);
+
 
 internal record message(string content);
 internal record errResult(string error, string reasonPhrase);

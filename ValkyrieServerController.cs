@@ -96,7 +96,7 @@ namespace Valkyrie_Server
             }
 
 
-            var functionJSON = DiscoverFunctionsHandler.GetFunctionDefinitionsJSON();
+            var functionJSON = GetSyncDataHandler.GetSyncData();
             Debug.WriteLine(functionJSON);
 
             using HttpClient client = new();
@@ -105,7 +105,7 @@ namespace Valkyrie_Server
 
             client.DefaultRequestHeaders.Add("x-api-key", ValkyrieAPIKey);
             client.DefaultRequestHeaders.Add("x-instruction-id", instructionId);
-            var response = await client.PostAsync(prodSyncFunctionsURITestBranch, content);
+            var response = await client.PostAsync(testSyncFunctionsURI, content);
 
             using StreamReader reader = new StreamReader(response.Content.ReadAsStream());
 
@@ -113,7 +113,7 @@ namespace Valkyrie_Server
 
             if (!response.IsSuccessStatusCode)
             {
-                return ("Error: " + response.StatusCode + "\n" + responseString, false, response.StatusCode.ToString());
+                return ("Server Response Error: " + response.StatusCode + "\n" + responseString, false, response.StatusCode.ToString());
             }
 
             if (string.IsNullOrEmpty(responseString))
@@ -124,6 +124,9 @@ namespace Valkyrie_Server
             return (responseString, response.IsSuccessStatusCode, response.ReasonPhrase ?? "");
         }
     }
+
+
+
 
     /// <summary>
     /// Typical content requested by the valkyrie server
@@ -136,4 +139,7 @@ namespace Valkyrie_Server
         [JsonPropertyName("Id")]
         public string InstructionId { get; set; }
     }
+
+
+
 }

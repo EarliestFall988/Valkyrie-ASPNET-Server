@@ -73,7 +73,7 @@ namespace ValkyrieFSMCore
 
             ImportedFunctions.Add(eachProject.Name, eachProject);
             ImportedFunctions.Add(getProjects.Name, getProjects);
-            ImportedFunctions.Add(splitProject.Name, getProjects);
+            ImportedFunctions.Add(splitProject.Name, splitProject);
 
             #endregion
         }

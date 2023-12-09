@@ -8,7 +8,14 @@
         /// <summary>
         /// The variable constructors
         /// </summary>
-        private Dictionary<string, Func<string, VariableIO, IVariableSignature>> VariableConstructors { get; set; } = new();
+        private Dictionary<string, (string description, Func<string, VariableIO, IVariableSignature> function)> VariableConstructors { get; set; } = new();
+
+        /// <summary>
+        /// Get the possible variable types
+        /// </summary>
+        public IEnumerable<(string key, string description)> GetAllPossibleVarableTypes =>
+            VariableConstructors.Select(x => (x.Key, x.Value.description));
+
 
         /// <summary>
         ///  Default constructor
@@ -20,11 +27,12 @@
         /// </summary>
         void Register()
         {
-            VariableConstructors.Add("projects", (key, io) =>
+            VariableConstructors.Add("projects", ("this variable maps to a list of projects", (key, io) =>
             {
                 var x = VariableDefinition<List<Project>>.CreateCustom(key, "projects", new List<Project>(), io);
                 return x;
-            });
+            }
+            ));
         }
 
         /// <summary>
@@ -44,7 +52,7 @@
                 return false;
             }
 
-            var func = VariableConstructors[type];
+            var func = VariableConstructors[type].function;
 
             result = func(key, io) as T;
             return true;

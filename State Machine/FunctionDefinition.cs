@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -50,7 +51,7 @@ namespace ValkyrieFSMCore
 
                 foreach (var x in ExpectedParameters)
                 {
-                    parameters.Add(new ExpectedParameter(x.Key, x.Value.IO.ToString(), x.Value.Type.ToString()));
+                    parameters.Add(new ExpectedParameter(x.Key, x.Value.Type.ToString(), x.Value.IO.ToString(), x.Value.Description));
                 }
 
                 return parameters.ToArray();
