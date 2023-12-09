@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 using Valkyrie_Server.State_Machine.Function_Definitions;
+using Valkyrie_Server.State_Machine.Function_Definitions.Math;
 
 using ValkyrieFSMCore.WM;
 
@@ -58,11 +59,17 @@ namespace ValkyrieFSMCore
             var divideNumber = new DivideNumber();
             var powerNumber = new PowNumber();
 
+            var convertfromIntToDec = new ConvertFromIntegerToDecimal();
+            var convertfromdecToInt = new ConvertFromDecimalToInteger();
+
             ImportedFunctions.Add(addNumber.Name, addNumber);
             ImportedFunctions.Add(subtractNumber.Name, subtractNumber);
             ImportedFunctions.Add(divideNumber.Name, divideNumber);
             ImportedFunctions.Add(multiplyNumber.Name, multiplyNumber);
             ImportedFunctions.Add(powerNumber.Name, powerNumber);
+
+            ImportedFunctions.Add(convertfromIntToDec.Name, convertfromIntToDec);
+            ImportedFunctions.Add(convertfromdecToInt.Name, convertfromdecToInt);
 
             #endregion
 
@@ -72,10 +79,12 @@ namespace ValkyrieFSMCore
             var eachProject = new EachProject();
             var getProjects = new GetProjects();
             var splitProject = new SplitProject();
+            var totalNumber = new TotalNumberOfProjects();
 
             ImportedFunctions.Add(eachProject.Name, eachProject);
             ImportedFunctions.Add(getProjects.Name, getProjects);
             ImportedFunctions.Add(splitProject.Name, splitProject);
+            ImportedFunctions.Add(totalNumber.Name, totalNumber);
 
             #endregion
 
@@ -90,7 +99,9 @@ namespace ValkyrieFSMCore
 
             #endregion
 
+            var respond = new Respond();
 
+            ImportedFunctions.Add(respond.Name, respond);
 
             CheckFunctions(); // 👈 verifying that the functions are built correctly
         }
