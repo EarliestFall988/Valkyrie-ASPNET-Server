@@ -29,26 +29,17 @@ namespace ValkyrieFSMCore
             Name = nameof(PowNumber);
             Function = () =>
             {
-                var x = Parameters["a"];
-                var y = Parameters["b"];
+                var a = Get<float>("a");
+                var b = Get<float>("b");
 
-                var z = Parameters["out"];
 
-                if (x is VariableDefinition<decimal> aV && y is VariableDefinition<decimal> bV && z is VariableDefinition<decimal> resultV)
-                {
+                var result = (float)Math.Pow(a, b);
 
-                    var b = bV.Value;
-                    var a = aV.Value;
+                Debug.WriteLine("a: " + a + " b: " + b + " result: " + result);
 
-                    var powResult = Math.Pow((double)a, (double)b);
+                Set<float>("out", result);
 
-                    Debug.WriteLine($"{a} to the power of {b} = {powResult}");
-
-                    resultV.Value = (decimal)powResult;
-                    return 1;
-                }
-
-                return -1;
+                return 1;
 
             };
         }

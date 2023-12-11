@@ -29,24 +29,19 @@ namespace ValkyrieFSMCore
             Name = nameof(MultiplyNumber);
             Function = () =>
             {
-                var x = Parameters["a"];
-                var y = Parameters["b"];
 
-                var z = Parameters["out"];
 
-                if (x is VariableDefinition<decimal> aV && y is VariableDefinition<decimal> bV && z is VariableDefinition<decimal> resultV)
-                {
-                    var b = bV.Value;
-                    var a = aV.Value;
+                var a = Get<float>("a");
+                var b = Get<float>("b");
 
-                    Debug.WriteLine($"{a} * {b} = {a * b}");
+                var result = a * b;
 
-                    resultV.Value = a * b;
+                Debug.WriteLine("a: " + a + " b: " + b + " result: " + result);
 
-                    return 1;
-                }
+                Set<float>("out", result);
 
-                return -1;
+
+                return 1;
             };
         }
     }
