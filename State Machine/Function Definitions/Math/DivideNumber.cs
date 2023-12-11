@@ -30,30 +30,15 @@ namespace ValkyrieFSMCore
             Name = nameof(DivideNumber);
             Function = () =>
             {
-                var x = Parameters["a"];
-                var y = Parameters["b"];
+                var a = Get<float>("a");
+                var b = Get<float>("b");
 
-                var z = Parameters["out"];
 
-                if (x is VariableDefinition<decimal> aV && y is VariableDefinition<decimal> bV && z is VariableDefinition<decimal> resultV)
-                {
-                    var b = bV.Value;
-                    var a = aV.Value;
+                Debug.WriteLine("\t dividing " + a + " / " + b + " " + (a / b).ToString());
 
-                    if (b == 0)
-                    {
-                        Debug.WriteLine("Cannot divide by zero");
-                        return -1;
-                    }
+                Set("out", a / b);
 
-                    Debug.WriteLine($"{a} / {b} = {a / b}");
-
-                    resultV.Value = a / b;
-
-                    return 1;
-                }
-
-                return -1;
+                return 1;
             };
         }
 

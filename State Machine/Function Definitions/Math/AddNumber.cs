@@ -17,7 +17,7 @@ namespace ValkyrieFSMCore
             {
                 { "a", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower()) },
                 { "b", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower()) },
-                { "out", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower(), VariableIO.Out) }
+                { "out", new Parameter(StateMachineVariableType.Decimal.ToString().ToLower(), io:VariableIO.Out) }
             };
         }
 
@@ -26,22 +26,17 @@ namespace ValkyrieFSMCore
             Name = nameof(AddNumber);
             Function = () =>
             {
-                var x = Parameters["a"];
-                var y = Parameters["b"];
+                var a = Get<float>("a");
+                var b = Get<float>("b");
 
-                var z = Parameters["out"];
 
-                if (x is VariableDefinition<decimal> a && y is VariableDefinition<decimal> b && z is VariableDefinition<decimal> result)
-                {
+                Debug.WriteLine("\t adding " + a + " + " + b + " " + (a + b).ToString());
 
-                    Debug.WriteLine($"{a} + {b} = {a.Value + b.Value}");
+                Set("out", a + b);
 
-                    result.Value = a.Value + b.Value;
+                return 1;
 
-                    return 1;
-                }
 
-                return -1;
             };
         }
 

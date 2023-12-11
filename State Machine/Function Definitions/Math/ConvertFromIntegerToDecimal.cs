@@ -15,8 +15,8 @@ namespace ValkyrieFSMCore
             Description = "Convert an integer type variable to decimal type variable";
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "integer", new Parameter("integer", VariableIO.In) },
-                { "decimal", new Parameter("decimal", VariableIO.Out) }
+                { "integer", new Parameter("integer", io:VariableIO.In) },
+                { "decimal", new Parameter("decimal", io:VariableIO.Out) }
             };
         }
 

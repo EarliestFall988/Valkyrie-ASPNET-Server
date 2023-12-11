@@ -102,7 +102,7 @@ namespace ValkyrieFSMCore
 
             IsRunning = true;
 
-            while (CurrentState != FallbackState)
+            while (CurrentState != FallbackState || CurrentState != null && CurrentState.FallbackState)
             {
                 Evaluate();
             }
@@ -145,7 +145,7 @@ namespace ValkyrieFSMCore
             {
                 int result = CurrentState.Function(); // execute the function
 
-                if (CurrentState == FallbackState)
+                if (CurrentState == FallbackState || CurrentState.FallbackState)
                 {
                     Debug.WriteLine("the current state is the fallback state, exiting.");
                     Completed = true;

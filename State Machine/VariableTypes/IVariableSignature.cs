@@ -26,5 +26,11 @@ namespace ValkyrieFSMCore
         /// This is the description of the variable
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// convert the variable data to json
+        /// </summary>
+        /// <returns></returns>
+        public string ToJSON();
     }
 }

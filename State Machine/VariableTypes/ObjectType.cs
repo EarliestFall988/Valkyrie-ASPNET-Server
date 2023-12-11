@@ -47,5 +47,10 @@ namespace ValkyrieFSMCore
             res = default(T);
             return false;
         }
+
+        public string ToJSON()
+        {
+            return System.Text.Json.JsonSerializer.Serialize(this);
+        }
     }
 }

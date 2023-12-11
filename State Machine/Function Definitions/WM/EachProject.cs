@@ -1,4 +1,6 @@
-﻿namespace ValkyrieFSMCore
+﻿using System.Diagnostics;
+
+namespace ValkyrieFSMCore
 {
     public class EachProject : FunctionDefinition
     {
@@ -25,13 +27,14 @@
         {
             Function = () =>
             {
-                var proj = Get<List<Project>>("project");
+                var proj = Get<List<Project>>("projects");
 
                 if (proj is List<Project> projects)
                 {
                     if (iterator < projects.Count)
                     {
                         Set("project", projects[iterator]);
+                        Debug.WriteLine($"\t\t {iterator} -> {projects[iterator].Name}");
                         iterator++;
                         return 0;
                     }

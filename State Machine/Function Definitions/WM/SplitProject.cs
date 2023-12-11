@@ -16,10 +16,10 @@ namespace ValkyrieFSMCore.WM
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
                 { "project", new Parameter("project") },
-                { "name", new Parameter("string", VariableIO.Out) },
-                { "id", new Parameter("string", VariableIO.Out) },
-                { "TotalManHours", new Parameter("decimal", VariableIO.Out) },
-                { "laborCost", new Parameter("decimal", VariableIO.Out) },
+                { "name", new Parameter("string", required: false, io:VariableIO.Out) },
+                { "id", new Parameter("string", required: false, io:VariableIO.Out) },
+                { "TotalManHours", new Parameter("decimal", required: false, io:VariableIO.Out) },
+                { "laborCost", new Parameter("decimal", required: false, io:VariableIO.Out) },
             };
         }
 
@@ -31,10 +31,10 @@ namespace ValkyrieFSMCore.WM
 
                 var project = Get<Project>("project");
 
-                Set("name", project.Name);
-                Set("id", project.Id);
-                Set("TotalManHours", project.TotalManHours);
-                Set("laborCost", project.LaborCost);
+                TrySet("name", project.Name);
+                TrySet("id", project.Id);
+                TrySet("TotalManHours", project.TotalManHours);
+                TrySet("laborCost", project.LaborCost);
 
                 return 1;
             };

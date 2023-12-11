@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json;
+
 namespace ValkyrieFSMCore
 {
     /// <summary>
@@ -77,5 +79,9 @@ namespace ValkyrieFSMCore
         #endregion
 
 
+        public string ToJSON()
+        {
+            return JsonSerializer.Serialize(Value);
+        }
     }
 }

@@ -49,7 +49,7 @@ namespace Valkyrie_Server
         /// </summary>
         /// <param name="id">the id of the machine</param>
         /// <param name="machine">the state machine</param>
-        public void AddMachine(string id, string instructions)
+        public StateMachine AddMachine(string id, string instructions)
         {
 
             if (string.IsNullOrEmpty(id))
@@ -65,8 +65,11 @@ namespace Valkyrie_Server
             machine.IsRunning = true;
             Machines.Add(id, (machine, DateTime.UtcNow));
 
+
             if (!IsTicking)
                 Boot();
+
+            return machine;
         }
 
         /// <summary>
@@ -74,14 +77,14 @@ namespace Valkyrie_Server
         /// </summary>
         private void Tick()
         {
-            Debug.WriteLine("tick " + Machines.Count);
+            //Debug.WriteLine("tick " + Machines.Count);
 
             foreach (var x in Machines)
             {
                 if (!x.Value.machine.Completed)
                 {
 
-                    if((DateTime.UtcNow - x.Value.time).TotalSeconds > TimoutSeconds)
+                    if ((DateTime.UtcNow - x.Value.time).TotalSeconds > TimoutSeconds)
                     {
                         Debug.WriteLine("Killing state machine " + x.Key + " due to timeout");
                         KillStateMachineProcess(x.Key);

@@ -16,8 +16,8 @@ namespace Valkyrie_Server.State_Machine.Function_Definitions.Math
             Description = "Convert a decimal type variable to integer type variable. Rounds up if the value is 0.5 or greater.";
             ExpectedParameters = new Dictionary<string, Parameter>()
             {
-                { "decimal", new Parameter("decimal", VariableIO.In) },
-                { "integer", new Parameter("integer", VariableIO.Out) },
+                { "decimal", new Parameter("decimal", io:VariableIO.In) },
+                { "integer", new Parameter("integer", io:VariableIO.Out) },
             };
         }
 

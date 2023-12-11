@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ValkyrieFSMCore
@@ -33,12 +34,23 @@ namespace ValkyrieFSMCore
         /// </summary>
         public string Description { get; set; } = "";
 
-        public Parameter(string type, VariableIO io = VariableIO.In, bool parameterInjectedSuccessfully = false, string description = "")
+        /// <summary>
+        /// Is this param required?
+        /// </summary>
+        public bool Required { get; set; } = false;
+
+        public Parameter(string type, VariableIO io = VariableIO.In, bool required = true, bool parameterInjectedSuccessfully = false, string description = "")
         {
             Type = type;
             this.InjectedSuccessfully = parameterInjectedSuccessfully;
             this.IO = io;
             this.Description = description;
+            this.Required = required;
+        }
+
+        public string ToJSON()
+        {
+            return JsonSerializer.Serialize(this);
         }
     }
 }

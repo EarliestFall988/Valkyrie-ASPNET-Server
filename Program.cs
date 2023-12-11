@@ -30,7 +30,7 @@ var app = builder.Build();
 var apiKey = env["API_KEY"];
 var valkApiKey = "some key";
 
-long minuteCountWaitTime = 5;
+long minuteCountWaitTime = 60000;
 StateMachinesController? stateMachinesController = new StateMachinesController(minuteCountWaitTime);
 
 
@@ -60,7 +60,7 @@ app.MapGet("/", (HttpContext ctx) =>
 app.MapGet("/api/v1/sync", async (HttpContext ctx) =>
 {
 
-    Debug.WriteLine("test 0");
+    //Debug.WriteLine("test 0");
 
     string instructionId = ctx.Request.Headers["id"];
     string key = ctx.Request.Headers["apikey"];
@@ -135,6 +135,8 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
         return "No instruction ID provided";
     }
 
+    Debug.WriteLine("check1");
+
     var ValkyireServerController = new ValkyrieServerController()
     {
         ValkyrieAPIKey = valkApiKey
@@ -152,23 +154,28 @@ app.MapPost("/api/v1/instruction/{id}", async (HttpContext context) =>
 
     string id = Guid.NewGuid().ToString();
 
-    stateMachinesController.AddMachine(id, response.content);
+    var machine = stateMachinesController.AddMachine(id, response.content);
 
     (bool complete, string result) status = (false, "Not completed - state machine took too long.");
 
     long tick = 0;
 
 
-    var totalTime = (60000 / 2) * minuteCountWaitTime;
+    var totalTime = (60000 / 20) * minuteCountWaitTime;
 
     while (!status.complete && tick < totalTime && !context.RequestAborted.IsCancellationRequested)
     {
 
-        Debug.WriteLine("status: " + status.complete + " " + tick);
+        //Debug.WriteLine(tick);
+
+        if (machine != null)
+        {
+            Debug.WriteLine(machine.Variables["total labor"].ToJSON());
+        }
 
         status = stateMachinesController.HandleStatus(id);
 
-        Thread.Sleep(0); // wait for the machine to complete
+        Thread.Sleep(1); // wait for the machine to complete
         tick++;
     }
 

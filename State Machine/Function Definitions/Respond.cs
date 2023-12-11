@@ -1,4 +1,7 @@
-﻿using ValkyrieFSMCore;
+﻿using System.Diagnostics;
+using System.Text.Json;
+
+using ValkyrieFSMCore;
 
 namespace Valkyrie_Server.State_Machine.Function_Definitions
 {
@@ -27,8 +30,17 @@ namespace Valkyrie_Server.State_Machine.Function_Definitions
 
                 if (StateMachine != null)
                 {
-                    StateMachine.Result = Get<object>("data").ToString() ?? "nothing to respond";
-                    StateMachine.FallbackState = StateMachine.States.Find(x => x.Function.GetHashCode() == this.Function.GetHashCode()); //hijack the fallback state so the sm stops normally after this state
+
+                    var res = Parameters["data"];
+
+
+                    Debug.WriteLine($"Responding with {res.ToJSON()}");
+
+                    StateMachine.Result = res.ToJSON();
+
+                    var state = StateMachine.States.Find(x => x.Function.GetHashCode() == this.Function.GetHashCode());
+                    if (state != null)
+                        state.FallbackState = true; //hijack the fallback state prop so the sm stops normally after this state
                     return 1;
                 }
 

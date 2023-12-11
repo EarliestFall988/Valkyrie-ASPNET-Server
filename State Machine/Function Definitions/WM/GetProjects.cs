@@ -79,6 +79,11 @@ namespace ValkyrieFSMCore.WM
                     if (projects == null)
                         projects = new ProjectsListResult();
 
+                    foreach(var x in projects.projects)
+                    {
+                        Debug.WriteLine(x.Name);
+                    }
+
                     Set("result", projects.projects);
                     return 1;
                 }

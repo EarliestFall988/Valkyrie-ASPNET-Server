@@ -130,5 +130,10 @@ namespace ValkyrieFSMCore
         {
             this.Value = value.ToString();
         }
+
+        public string ToJSON()
+        {
+            return System.Text.Json.JsonSerializer.Serialize(this);
+        }
     }
 }

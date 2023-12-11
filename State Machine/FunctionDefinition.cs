@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,6 +33,12 @@ namespace ValkyrieFSMCore
         /// the description of the function
         /// </summary>
         public string Description { get; set; } = "";
+
+
+        /// <summary>
+        /// The required param count
+        /// </summary>
+        public int RequiredParamCount => ExpectedParameters.Count(x => x.Value.Required);
 
         /// <summary>
         /// The dictionary of expected parameters and types
@@ -103,17 +110,17 @@ namespace ValkyrieFSMCore
         /// <exception cref="Exception"></exception>
         public bool TryGet<T>(string name, out T? value)
         {
-            try
-            {
-                var param = GetVariableDefinitionParameter<T>(name);
-                value = param.Value;
-                return true;
-            }
-            catch
+
+            if (!Parameters.ContainsKey(name))
             {
                 value = default(T);
                 return false;
             }
+
+            var param = GetVariableDefinitionParameter<T>(name);
+            value = param.Value;
+            return true;
+
         }
 
         /// <summary>
@@ -137,16 +144,14 @@ namespace ValkyrieFSMCore
         /// <returns></returns>
         public bool TrySet<T>(string name, T value)
         {
-            try
-            {
-                var param = GetVariableDefinitionParameter<T>(name);
-                param.Value = value;
-                return true;
-            }
-            catch
+            if (!Parameters.ContainsKey(name))
             {
                 return false;
             }
+
+            var param = GetVariableDefinitionParameter<T>(name);
+            param.Value = value;
+            return true;
         }
 
         /// <summary>
@@ -157,17 +162,42 @@ namespace ValkyrieFSMCore
         /// <returns></returns>
         public bool TryInjectParameters(Dictionary<string, IVariableSignature> parameters, out string result)
         {
-            if (parameters.Count == ExpectedParameters.Count)
+            //if (parameters.Count >= RequiredParamCount)
+            //{
+
+            foreach (var x in parameters)
             {
 
-                foreach (var x in parameters)
+                Debug.WriteLine(x.Key + " " + x.Value.Key);
+
+                if (ExpectedParameters.ContainsKey(x.Key) && !Parameters.ContainsKey(x.Key))
                 {
-                    if (ExpectedParameters.ContainsKey(x.Key))
+
+                    var paramType = ExpectedParameters[x.Key].Type;
+                    var paramIo = ExpectedParameters[x.Key].IO;
+
+                    var valueType = x.Value.Type;
+                    var valueIo = x.Value.IO;
+
+                    if (paramType == valueType)
                     {
-                        if (ExpectedParameters[x.Key].Type == x.Value.Type)
+                        Parameters.Add(x.Key, x.Value);
+                        ExpectedParameters[x.Key] = new Parameter(ExpectedParameters[x.Key].Type, parameterInjectedSuccessfully: true);
+                        Debug.WriteLine("\t\t" + x.Key + " injected successfully");
+                    }
+                    else
+                    {
+                        if (paramType.Trim().ToLower() == "any" && paramIo == VariableIO.In)
                         {
                             Parameters.Add(x.Key, x.Value);
                             ExpectedParameters[x.Key] = new Parameter(ExpectedParameters[x.Key].Type, parameterInjectedSuccessfully: true);
+                            Debug.WriteLine("\t\t" + x.Key + " injected successfully");
+                        }
+                        else if (valueType.Trim().ToLower() == "any" && valueIo == VariableIO.In)
+                        {
+                            Parameters.Add(x.Key, x.Value);
+                            ExpectedParameters[x.Key] = new Parameter(ExpectedParameters[x.Key].Type, parameterInjectedSuccessfully: true);
+                            Debug.WriteLine("\t\t" + x.Key + " injected successfully");
                         }
                         else
                         {
@@ -175,31 +205,41 @@ namespace ValkyrieFSMCore
                             return false;
                         }
                     }
-                    else
-                    {
-
-                        result = "";
-                        List<string> keys = new List<string>();
-                        foreach (var y in ExpectedParameters)
-                        {
-                            if (y.Value.InjectedSuccessfully == false)
-                            {
-                                keys.Add(y.Key);
-                            }
-                        }
-                        result = "Parameter mismatch. The expected parameters " + string.Join(", ", keys) + " were not provided for the function " + Name + ".";
-                        return false;
-                    }
                 }
+                else
+                {
 
-                result = "Success!";
-                return true;
+                    result = "";
+                    List<string> keys = new List<string>();
+                    foreach (var y in ExpectedParameters)
+                    {
+                        if (y.Value.InjectedSuccessfully == false)
+                        {
+                            keys.Add(y.Key);
+                        }
+                    }
+                    result = "Parameter mismatch. The expected parameters " + string.Join(", ", keys) + " were not provided for the function " + Name + ".";
+                    return false;
+                }
             }
-            else
+
+            foreach (var x in ExpectedParameters)
             {
-                result = "Parameter count mismatch. The expected number of parameters is " + ExpectedParameters.Count + " but " + parameters.Count + " were provided.";
-                return false;
+                if (x.Value.Required && x.Value.InjectedSuccessfully == false)
+                {
+                    result = "Parameter mismatch. The expected parameter " + x.Key + " was not provided for the function " + Name + ".";
+                    return false;
+                }
             }
+
+            result = "Success!";
+            return true;
+            //}
+            //else
+            //{
+            //    result = "Parameter count mismatch. The expected number of connected parameters should be at least " + ExpectedParameters.Count + " but only " + parameters.Count + " were provided for the function " + Name + ".";
+            //    return false;
+            //}
         }
 
         protected abstract void DefineFunction();

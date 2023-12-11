@@ -23,7 +23,7 @@ namespace Valkyrie_Server
         /// <summary>
         /// the base URI for the Valkyrie server
         /// </summary>
-        private Uri selectedURI = prodGetDataURI;
+        private Uri selectedURI = testGetDataURI;
 
         public ValkyrieServerController()
         {
@@ -60,8 +60,10 @@ namespace Valkyrie_Server
             //Debug.WriteLine("\n\n\t" + selectedURI + "\n");
             //Debug.WriteLine("\n\n\t" + data + "\n");
 
-            var response = await client.PostAsync(selectedURI, content);
+            Debug.WriteLine(ValkyrieAPIKey);
+
             client.DefaultRequestHeaders.Add("x-api-key", ValkyrieAPIKey);
+            var response = await client.PostAsync(selectedURI, content);
 
             using StreamReader reader = new StreamReader(response.Content.ReadAsStream());
             reader.BaseStream.Seek(0, SeekOrigin.Begin);

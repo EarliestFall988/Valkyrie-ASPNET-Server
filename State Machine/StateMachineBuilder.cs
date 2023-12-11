@@ -302,6 +302,9 @@ namespace ValkyrieFSMCore
 
                 if (_factory.TryConstructVariable(name, type, out IVariableSignature? variableConstructionResult, ioResult))
                 {
+
+                    Debug.WriteLine(name);
+
                     if (variableConstructionResult != null)
                         _variables.Add(name, variableConstructionResult);
                     else
@@ -348,23 +351,31 @@ namespace ValkyrieFSMCore
                 createdVariables = true;
             }
 
+            Debug.WriteLine("\n\n\n\n");
+
             foreach (var x in functionsJson.EnumerateArray())
             {
                 var name = x.GetProperty("name").GetString();
                 var parameters = x.GetProperty("parameters");
+
+                var functionName = name ?? "";
                 // var code = x.GetProperty("code").GetString();
 
+                if (name != null && name.Contains(" "))
+                {
+                    functionName = name.Split(" ")[0];
+                }
 
-
+                Console.WriteLine($"function: ${name} function name: {functionName}");
 
                 Dictionary<string, Parameter> parameterList = new Dictionary<string, Parameter>();
 
                 Dictionary<string, IVariableSignature> injectionVariables = new Dictionary<string, IVariableSignature>();
 
-                if (name == null)
+                if (name == null || functionName == null)
                     throw new Exception($"Invalid function definition. A valid name must be given after the definition.");
 
-                if (!_functionLibrary.TryGetFunction(name, out var function))
+                if (!_functionLibrary.TryGetFunction(functionName, out var function))
                     throw new Exception($"Invalid function definition. The function {name} does not exist.");
 
                 if (function == null)
@@ -374,14 +385,22 @@ namespace ValkyrieFSMCore
                 {
                     var paramName = y.GetProperty("name").GetString();
                     var paramType = y.GetProperty("type").GetString();
-                    var varToConnectName = y.GetProperty("connectVar").ToString();
+                    var varToConnectName = y.GetProperty("connectVar").GetString();
 
                     //var overrideType = "";
+
+                    if (varToConnectName == null)
+                    {
+                        throw new Exception("var to connect name is null");
+                    }
 
                     if (paramName == null)
                     {
                         throw new Exception($"Invalid function parameter definition. A valid name must be given after the definition.");
                     }
+
+
+                    Debug.WriteLine($"{paramName} : {varToConnectName}");
 
                     // #region unity specific
                     //var extResult = ParseExtraneousVariables(varToConnectName);
@@ -429,26 +448,36 @@ namespace ValkyrieFSMCore
                             $"in the variable factory so it can be properly created upon building the state machine. ({paramName} : {paramType})");
 
 
-                    parameterList.Add(paramName, new Parameter(paramType, parameterInjectedSuccessfully: true));
+                    parameterList.Add(paramName, new Parameter(paramType, parameterInjectedSuccessfully: false));
 
-                    if (!_variables.TryGetValue(varToConnectName, out var variable))
-                        throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" does not exist. ({name} - {paramName} : {paramType})");
 
-                    if (variable == null)
-                        throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" cannot be generated. ({name} - {paramName} : {paramType})");
+                    if (varToConnectName.Length > 0)
+                    {
 
-                    if (variable.Type != paramType)
-                        throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" is not of type {paramType}. ({name} - {paramName} : {paramType})");
+                        if (!_variables.TryGetValue(varToConnectName, out var variable))
+                            throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" does not exist. ({name} - {paramName} : {paramType})");
 
-                    injectionVariables.Add(paramName, variable);
+                        if (variable == null)
+                            throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" cannot be generated. ({name} - {paramName} : {paramType})");
+
+                        //if (variable.Type != paramType)
+                        //    throw new Exception($"Invalid function parameter definition. The connection variable \"{varToConnectName}\" is not of type {paramType}. ({name} - {paramName} : {paramType})");
+
+                        if (variable != null)
+                            injectionVariables.Add(paramName, variable);
+                    }
                 }
 
                 function.ExpectedParameters = parameterList;
+                Debug.WriteLine(function.Name);
 
                 bool injectionResult = function.TryInjectParameters(injectionVariables, out var result2);
 
                 if (!injectionResult)
-                    throw new Exception($"{result2}");
+                {
+                    Debug.WriteLine(result2);
+                }
+                //throw new Exception($"{result2}");
 
                 if (_functions.ContainsKey(name))
                     throw new Exception($"Invalid function definition. The function {name} already exists.");
