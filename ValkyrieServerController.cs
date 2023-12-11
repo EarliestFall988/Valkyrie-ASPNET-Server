@@ -23,7 +23,7 @@ namespace Valkyrie_Server
         /// <summary>
         /// the base URI for the Valkyrie server
         /// </summary>
-        private Uri selectedURI = testGetDataURI;
+        private Uri selectedURI = prodGetDataURI;
 
         public ValkyrieServerController()
         {
